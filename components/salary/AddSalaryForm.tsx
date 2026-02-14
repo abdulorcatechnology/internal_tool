@@ -97,7 +97,7 @@ export default function AddSalaryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 overflow-auto">
       <SheetHeader>
         <SheetTitle>
           {isEdit ? "Edit salary record" : "Add salary record"}
