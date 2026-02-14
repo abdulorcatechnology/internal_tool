@@ -1,18 +1,9 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Pencil, UserX } from "lucide-react";
-import {
-  useEmployees,
-  useCreateEmployee,
-  useUpdateEmployee,
-  useDeactivateEmployee,
-} from "@/lib/api/employees";
-import type {
-  Employee,
-  CreateEmployeeInput,
-  EmployeeStatus,
-} from "@/types/employees";
+import { useEmployees, useDeactivateEmployee } from "@/lib/api/employees";
+import type { Employee, EmployeeStatus } from "@/types/employees";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,14 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -44,10 +28,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/lib/api/profile";
+import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
+import dateHelper from "@/lib/helper/date";
+import currencyHelper from "@/lib/helper/currency";
 
 const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
@@ -55,219 +41,8 @@ const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
   { value: "inactive", label: "Inactive" },
 ];
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function formatCurrency(n: number) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(n);
-}
-
-function EmployeeForm({
-  employee,
-  onSuccess,
-  onCancel,
-}: {
-  employee: Employee | null;
-  onSuccess: () => void;
-  onCancel: () => void;
-}) {
-  const [form, setForm] = useState<CreateEmployeeInput>({
-    full_name: employee?.full_name ?? "",
-    employee_id: employee?.employee_id ?? "",
-    department: employee?.department ?? "",
-    role: employee?.role ?? "",
-    email: employee?.email ?? "",
-    monthly_salary: employee?.monthly_salary ?? 0,
-    joining_date:
-      employee?.joining_date ?? new Date().toISOString().slice(0, 10),
-    payment_method_notes: employee?.payment_method_notes ?? "",
-    status: employee?.status ?? "active",
-  });
-
-  useEffect(() => {
-    setForm({
-      full_name: employee?.full_name ?? "",
-      employee_id: employee?.employee_id ?? "",
-      department: employee?.department ?? "",
-      role: employee?.role ?? "",
-      email: employee?.email ?? "",
-      monthly_salary: employee?.monthly_salary ?? 0,
-      joining_date:
-        employee?.joining_date ?? new Date().toISOString().slice(0, 10),
-      payment_method_notes: employee?.payment_method_notes ?? "",
-      status: employee?.status ?? "active",
-    });
-  }, [employee]);
-
-  const createMutation = useCreateEmployee();
-  const updateMutation = useUpdateEmployee();
-  const isEdit = !!employee;
-  const mutation = isEdit ? updateMutation : createMutation;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    try {
-      if (isEdit) {
-        await updateMutation.mutateAsync({ id: employee.id, input: form });
-      } else {
-        await createMutation.mutateAsync(form);
-      }
-      onSuccess();
-    } catch (_) {
-      // Error is shown via mutation.error
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <SheetHeader>
-        <SheetTitle>{isEdit ? "Edit employee" : "Add employee"}</SheetTitle>
-        <SheetDescription>
-          {isEdit
-            ? "Update employee details."
-            : "All fields with * are required."}
-        </SheetDescription>
-      </SheetHeader>
-      <div className="flex flex-1 flex-col gap-4 overflow-auto px-4">
-        {mutation.isError && (
-          <p className="text-sm text-destructive" role="alert">
-            {mutation.error?.message}
-          </p>
-        )}
-        <div className="grid gap-2">
-          <Label htmlFor="full_name">Full name *</Label>
-          <Input
-            id="full_name"
-            value={form.full_name}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, full_name: e.target.value }))
-            }
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="employee_id">Employee ID *</Label>
-          <Input
-            id="employee_id"
-            value={form.employee_id}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, employee_id: e.target.value }))
-            }
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="department">Department</Label>
-          <Input
-            id="department"
-            value={form.department}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, department: e.target.value }))
-            }
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="role">Role</Label>
-          <Input
-            id="role"
-            value={form.role ?? ""}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, role: e.target.value || null }))
-            }
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="monthly_salary">Monthly salary *</Label>
-          <Input
-            id="monthly_salary"
-            type="number"
-            min={0}
-            step={0.01}
-            value={form.monthly_salary || ""}
-            onChange={(e) =>
-              setForm((p) => ({
-                ...p,
-                monthly_salary: Number(e.target.value) || 0,
-              }))
-            }
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="joining_date">Joining date *</Label>
-          <Input
-            id="joining_date"
-            type="date"
-            value={form.joining_date}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, joining_date: e.target.value }))
-            }
-            required
-          />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="payment_method_notes">Payment method / notes</Label>
-          <Input
-            id="payment_method_notes"
-            value={form.payment_method_notes ?? ""}
-            onChange={(e) =>
-              setForm((p) => ({
-                ...p,
-                payment_method_notes: e.target.value || null,
-              }))
-            }
-          />
-        </div>
-        {isEdit && (
-          <div className="grid gap-2">
-            <Label>Status</Label>
-            <Select
-              value={form.status}
-              onValueChange={(v: EmployeeStatus) =>
-                setForm((p) => ({ ...p, status: v }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-      </div>
-      <SheetFooter className="flex-row gap-2 border-t p-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving…" : isEdit ? "Update" : "Add employee"}
-        </Button>
-      </SheetFooter>
-    </form>
-  );
-}
+const formatDate = dateHelper.formatDate;
+const formatCurrency = currencyHelper.formatCurrency;
 
 export default function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | "all">(
@@ -416,7 +191,7 @@ export default function EmployeesPage() {
                     <TableCell className="font-medium">
                       {emp.full_name}
                     </TableCell>
-                    <TableCell>{emp.employee_id}</TableCell>
+                    <TableCell>{emp.employee_id ?? "—"}</TableCell>
                     <TableCell>{emp.department || "—"}</TableCell>
                     <TableCell>{emp.email}</TableCell>
                     <TableCell className="text-right">
@@ -470,7 +245,7 @@ export default function EmployeesPage() {
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
-          <EmployeeForm
+          <AddEmployeesForm
             employee={editingEmployee}
             onSuccess={() => setSheetOpen(false)}
             onCancel={() => setSheetOpen(false)}

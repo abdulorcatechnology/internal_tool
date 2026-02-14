@@ -53,7 +53,7 @@ export async function createEmployee(
     .from("employees")
     .insert({
       full_name: input.full_name,
-      employee_id: input.employee_id,
+      employee_id: input.employee_id?.trim() || null,
       department: input.department ?? "",
       role: input.role ?? null,
       email: input.email,
@@ -74,7 +74,7 @@ export async function updateEmployee(
 ): Promise<Employee> {
   const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (input.full_name !== undefined) payload.full_name = input.full_name;
-  if (input.employee_id !== undefined) payload.employee_id = input.employee_id;
+  if (input.employee_id !== undefined) payload.employee_id = input.employee_id?.trim() || null;
   if (input.department !== undefined) payload.department = input.department;
   if (input.role !== undefined) payload.role = input.role;
   if (input.email !== undefined) payload.email = input.email;

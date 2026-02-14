@@ -3,7 +3,7 @@ export type EmployeeStatus = "active" | "inactive";
 export type Employee = {
   id: string;
   full_name: string;
-  employee_id: string;
+  employee_id: string | null;
   department: string;
   role: string | null;
   email: string;
@@ -17,7 +17,7 @@ export type Employee = {
 
 export type CreateEmployeeInput = {
   full_name: string;
-  employee_id: string;
+  employee_id?: string | null;
   department: string;
   role?: string | null;
   email: string;
