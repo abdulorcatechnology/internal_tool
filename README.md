@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Company Payroll & Expense Manager
 
-## Getting Started
+Internal dashboard for payroll, salary tracking, and office expenses. Built with Next.js, Supabase (auth + DB), React Query, and shadcn/ui.
 
-First, run the development server:
+## Tech stack
+
+- **Next.js 16** (App Router)
+- **Supabase** – auth and database
+- **React Query** – server state and caching
+- **shadcn/ui** – UI components and charts
+
+## Getting started
+
+### 1. Supabase project
+
+1. Create a project at [supabase.com/dashboard](https://supabase.com/dashboard).
+2. In **Authentication → Providers**, enable **Email** (and optionally **Confirm email** off for local dev).
+3. In **Project Settings → API**, copy:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 2. Environment variables
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Edit `.env.local` and set:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Database schema
 
-## Learn More
+In the Supabase **SQL Editor**, run the migration:
 
-To learn more about Next.js, take a look at the following resources:
+- `supabase/migrations/00001_profiles.sql`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+This creates the `profiles` table (with `role`: admin / finance / viewer) and the trigger that creates a profile on signup. To make the first user an admin, run:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```sql
+update public.profiles set role = 'admin' where id = 'your-user-uuid';
+```
 
-## Deploy on Vercel
+(Get the UUID from **Authentication → Users** after signing up.)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Install and run
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000). You’ll be redirected to **/login**. Use **Sign up** to create an account, then you’ll land on the dashboard.
+
+## Project structure
+
+- `app/(auth)/` – login, signup (public)
+- `app/dashboard/` – main app (protected), dashboard home, employees, salary, expenses, reports, settings
+- `app/providers.tsx` – React Query + TooltipProvider
+- `components/ui/` – shadcn components
+- `components/layout/` – AppSidebar
+- `lib/supabase/` – browser and server Supabase clients
+- `lib/auth.ts` – getCurrentUser, getProfile
+- `middleware.ts` – session refresh and route protection
+- `supabase/migrations/` – SQL migrations
+- `types/` – shared TypeScript types
+
+## Next steps
+
+- **Employees** – CRUD, filters, department
+- **Salary** – monthly records, status (Pending/Paid/Deferred), receipts
+- **Expenses** – fixed assets and day-to-day expenses
+- **Reports** – filters, CSV/PDF export
+- **Settings** – admin email for salary reminder
+- **Email reminder** – cron (e.g. Vercel Cron) + Supabase or Resend
+
+## Deploy
+
+Set the same env vars in your host (Vercel, etc.). For cron-based salary reminders, add a serverless route or use Supabase Edge Functions.
