@@ -2,7 +2,11 @@
 
 import { useState, useMemo } from "react";
 import { Plus, Pencil, UserX } from "lucide-react";
-import { useEmployees, useDepartments, useDeactivateEmployee } from "@/lib/api/employees";
+import {
+  useEmployees,
+  useDepartments,
+  useDeactivateEmployee,
+} from "@/lib/api/employees";
 import type { Employee, EmployeeStatus } from "@/types/employees";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,12 +32,7 @@ import dateHelper from "@/lib/helper/date";
 import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
-
-const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
-  { value: "all", label: "All statuses" },
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-];
+import { STATUS_OPTIONS } from "@/lib/options/employees";
 
 const formatDate = dateHelper.formatDate;
 const formatCurrency = currencyHelper.formatCurrency;
