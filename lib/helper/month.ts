@@ -15,7 +15,18 @@ function calculateLast24Months(): { value: string; label: string }[] {
   return out;
 }
 
+function monthToDate(ym: string): string {
+  return `${ym}-01`;
+}
+function nextMonth(ymd: string): string {
+  const d = new Date(ymd);
+  d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export default {
   getMonthOptions: calculateLast24Months,
   formatMonth: formatMonthAndYear,
+  monthToDate: monthToDate,
+  nextMonth: nextMonth,
 };
