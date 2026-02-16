@@ -15,13 +15,12 @@ import type {
   ExpensePaymentStatus,
 } from "@/types/expenses";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import currencyHelper from "@/lib/helper/currency";
-import dateHelper from "@/lib/helper/date";
 import DayToDayForm from "@/components/expenses/DayToDayExpense/AddDayToDayExpenseForm";
 import FixedAssetForm from "@/components/expenses/FixedAsset/AddFixedAsset";
 import Heading from "@/components/shared/Heading";
 import DayToDayExpenseTable from "@/components/expenses/DayToDayExpense/DayToDayExpenseTable";
 import FixedAssetTable from "@/components/expenses/FixedAsset/FixedAssetTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // ----- Page -----
 export default function ExpensesPage() {
@@ -79,31 +78,40 @@ export default function ExpensesPage() {
         />
       </div>
 
-      {/* Fixed assets */}
-      <FixedAssetTable
-        canEdit={canEdit}
-        assetTypeFilter={assetTypeFilter}
-        setAssetTypeFilter={setAssetTypeFilter}
-        assetStatusFilter={assetStatusFilter}
-        setAssetStatusFilter={setAssetStatusFilter}
-        fixedAssets={fixedAssets}
-        isLoading={assetsLoading}
-        setEditingAsset={setEditingAsset}
-        setAssetSheetOpen={setAssetSheetOpen}
-      />
-
-      {/* Day to day expenses */}
-      <DayToDayExpenseTable
-        canEdit={canEdit}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
-        paymentStatusFilter={paymentStatusFilter}
-        setPaymentStatusFilter={setPaymentStatusFilter}
-        dayExpenses={dayExpenses}
-        dayLoading={dayLoading}
-        setEditingDayExpense={setEditingDayExpense}
-        setDaySheetOpen={setDaySheetOpen}
-      />
+      <Tabs defaultValue="day-to-day-expenses">
+        <TabsList>
+          <TabsTrigger value="day-to-day-expenses">
+            Day to Day Expenses
+          </TabsTrigger>
+          <TabsTrigger value="fixed-assets">Fixed Assets</TabsTrigger>
+        </TabsList>
+        <TabsContent value="day-to-day-expenses">
+          <DayToDayExpenseTable
+            canEdit={canEdit}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            paymentStatusFilter={paymentStatusFilter}
+            setPaymentStatusFilter={setPaymentStatusFilter}
+            dayExpenses={dayExpenses}
+            dayLoading={dayLoading}
+            setEditingDayExpense={setEditingDayExpense}
+            setDaySheetOpen={setDaySheetOpen}
+          />
+        </TabsContent>
+        <TabsContent value="fixed-assets">
+          <FixedAssetTable
+            canEdit={canEdit}
+            assetTypeFilter={assetTypeFilter}
+            setAssetTypeFilter={setAssetTypeFilter}
+            assetStatusFilter={assetStatusFilter}
+            setAssetStatusFilter={setAssetStatusFilter}
+            fixedAssets={fixedAssets}
+            isLoading={assetsLoading}
+            setEditingAsset={setEditingAsset}
+            setAssetSheetOpen={setAssetSheetOpen}
+          />
+        </TabsContent>
+      </Tabs>
 
       <Sheet open={assetSheetOpen} onOpenChange={setAssetSheetOpen}>
         <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
