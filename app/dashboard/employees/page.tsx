@@ -35,6 +35,7 @@ import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import dateHelper from "@/lib/helper/date";
 import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
+import SelectDropdown from "@/components/shared/SelectDropdown";
 
 const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
@@ -117,47 +118,23 @@ export default function EmployeesPage() {
           <CardDescription>Filter by status and department.</CardDescription>
           <div className="flex flex-wrap gap-4 pt-2">
             <div className="flex items-center gap-2">
-              <Label className="text-muted-foreground whitespace-nowrap text-sm">
-                Status
-              </Label>
-              <Select
+              <SelectDropdown
+                label="Status"
+                options={STATUS_OPTIONS}
                 value={statusFilter}
-                onValueChange={(v) =>
-                  setStatusFilter(v as EmployeeStatus | "all")
-                }
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(v) => setStatusFilter(v as EmployeeStatus | "all")}
+              />
             </div>
             <div className="flex items-center gap-2">
-              <Label className="text-muted-foreground whitespace-nowrap text-sm">
-                Department
-              </Label>
-              <Select
+              <SelectDropdown
+                label="Department"
+                options={[
+                  { value: "all", label: "All departments" },
+                  ...departments.map((d) => ({ value: d, label: d })),
+                ]}
                 value={departmentFilter}
-                onValueChange={setDepartmentFilter}
-              >
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All departments</SelectItem>
-                  {departments.map((d) => (
-                    <SelectItem key={d} value={d}>
-                      {d}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={(v) => setDepartmentFilter(v as string)}
+              />
             </div>
           </div>
         </CardHeader>
