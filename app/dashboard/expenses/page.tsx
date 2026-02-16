@@ -46,7 +46,7 @@ import dateHelper from "@/lib/helper/date";
 import expensesOptions from "@/lib/options/expenses";
 import DayToDayForm from "@/components/expenses/AddDayToDayExpenseForm";
 import FixedAssetForm from "@/components/expenses/AddFixedAsset";
-import Heading from "@/components/layout/Heading";
+import Heading from "@/components/shared/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
 const formatDate = dateHelper.formatDate;

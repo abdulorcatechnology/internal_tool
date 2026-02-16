@@ -31,7 +31,7 @@ import {
 import currencyHelper from "@/lib/helper/currency";
 import { payrollChartConfig, trendChartConfig } from "@/lib/options/dashboard";
 import OverviewCard from "@/components/dashboard/OverviewCard";
-import Heading from "@/components/layout/Heading";
+import Heading from "@/components/shared/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
 

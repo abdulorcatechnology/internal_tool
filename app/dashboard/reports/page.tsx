@@ -1,4 +1,4 @@
-import Heading from "@/components/layout/Heading";
+import Heading from "@/components/shared/Heading";
 import {
   Card,
   CardContent,

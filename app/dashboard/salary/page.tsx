@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import SalaryTable from "@/components/salary/SalaryTable";
 import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
-import Heading from "@/components/layout/Heading";
+import Heading from "@/components/shared/Heading";
 
 type SalaryTab = "records" | "analysis";
 

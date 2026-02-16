@@ -34,7 +34,7 @@ import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import dateHelper from "@/lib/helper/date";
 import currencyHelper from "@/lib/helper/currency";
-import Heading from "@/components/layout/Heading";
+import Heading from "@/components/shared/Heading";
 
 const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
