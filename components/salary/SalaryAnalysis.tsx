@@ -14,14 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import DataTable from "@/components/shared/DataTable";
 import {
   Select,
   SelectContent,
@@ -206,48 +199,44 @@ export default function SalaryAnalysis() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead className="text-right">YTD paid</TableHead>
-                <TableHead className="text-right">Pending</TableHead>
-                <TableHead className="text-right">Paid</TableHead>
-                <TableHead className="text-right">Deferred</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {ytdList.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-muted-foreground text-center py-8"
-                  >
-                    No salary records this year.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                ytdList.map((e) => (
-                  <TableRow key={e.employeeId}>
-                    <TableCell className="font-medium">
-                      {e.name}
-                      {e.employeeIdLabel ? ` (${e.employeeIdLabel})` : ""}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(e.ytd)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {e.pendingCount}
-                    </TableCell>
-                    <TableCell className="text-right">{e.paidCount}</TableCell>
-                    <TableCell className="text-right">
-                      {e.deferredCount}
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+          <DataTable<YtdEmployee>
+            columns={[
+              {
+                id: "employee",
+                header: "Employee",
+                className: "font-medium",
+                cell: (e) =>
+                  `${e.name}${e.employeeIdLabel ? ` (${e.employeeIdLabel})` : ""}`,
+              },
+              {
+                id: "ytd",
+                header: "YTD paid",
+                align: "right",
+                cell: (e) => formatCurrency(e.ytd),
+              },
+              {
+                id: "pending",
+                header: "Pending",
+                align: "right",
+                cell: (e) => e.pendingCount,
+              },
+              {
+                id: "paid",
+                header: "Paid",
+                align: "right",
+                cell: (e) => e.paidCount,
+              },
+              {
+                id: "deferred",
+                header: "Deferred",
+                align: "right",
+                cell: (e) => e.deferredCount,
+              },
+            ]}
+            data={ytdList}
+            getRowKey={(e) => e.employeeId}
+            emptyMessage="No salary records this year."
+          />
 
           {ytdList.length > 0 && (
             <>

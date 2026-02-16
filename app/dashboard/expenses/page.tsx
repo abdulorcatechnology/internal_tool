@@ -23,15 +23,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import DataTable from "@/components/shared/DataTable";
+import StatusBadge from "@/components/shared/StatusBadge";
 import {
   Select,
   SelectContent,
@@ -40,7 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import currencyHelper from "@/lib/helper/currency";
 import dateHelper from "@/lib/helper/date";
 import expensesOptions from "@/lib/options/expenses";
@@ -182,62 +175,69 @@ export default function ExpensesPage() {
               No fixed assets yet.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Asset</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Purchase date</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
-                  <TableHead>Assigned to</TableHead>
-                  <TableHead>Status</TableHead>
-                  {canEdit && (
-                    <TableHead className="w-[80px]">Actions</TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fixedAssets.map((a) => (
-                  <TableRow key={a.id}>
-                    <TableCell className="font-medium">
-                      {a.asset_name}
-                    </TableCell>
-                    <TableCell className="capitalize">{a.asset_type}</TableCell>
-                    <TableCell>{formatDate(a.purchase_date)}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(a.cost)}
-                    </TableCell>
-                    <TableCell>{a.employees?.full_name ?? "—"}</TableCell>
-                    <TableCell>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          a.status === "active"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-muted text-muted-foreground",
-                        )}
+            <DataTable<FixedAssetWithEmployee>
+              columns={[
+                {
+                  id: "asset",
+                  header: "Asset",
+                  className: "font-medium",
+                  cell: (a) => a.asset_name,
+                },
+                {
+                  id: "type",
+                  header: "Type",
+                  className: "capitalize",
+                  cell: (a) => a.asset_type,
+                },
+                {
+                  id: "purchase_date",
+                  header: "Purchase date",
+                  cell: (a) => formatDate(a.purchase_date),
+                },
+                {
+                  id: "cost",
+                  header: "Cost",
+                  align: "right",
+                  cell: (a) => formatCurrency(a.cost),
+                },
+                {
+                  id: "assigned",
+                  header: "Assigned to",
+                  cell: (a) => a.employees?.full_name ?? "—",
+                },
+                {
+                  id: "status",
+                  header: "Status",
+                  cell: (a) => (
+                    <StatusBadge
+                      variant={a.status === "active" ? "success" : "muted"}
+                    >
+                      {a.status}
+                    </StatusBadge>
+                  ),
+                },
+              ]}
+              data={fixedAssets}
+              getRowKey={(a) => a.id}
+              emptyMessage="No fixed assets yet."
+              renderActions={
+                canEdit
+                  ? (a) => (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => {
+                          setEditingAsset(a);
+                          setAssetSheetOpen(true);
+                        }}
                       >
-                        {a.status}
-                      </span>
-                    </TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            setEditingAsset(a);
-                            setAssetSheetOpen(true);
-                          }}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        <Pencil className="size-4" />
+                      </Button>
+                    )
+                  : undefined
+              }
+              showActions={canEdit}
+            />
           )}
         </CardContent>
       </Card>
@@ -317,73 +317,82 @@ export default function ExpensesPage() {
               No day-to-day expenses yet.
             </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Vendor</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Receipt</TableHead>
-                  {canEdit && (
-                    <TableHead className="w-[80px]">Actions</TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dayExpenses.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="capitalize">{e.category}</TableCell>
-                    <TableCell>{e.vendor || "—"}</TableCell>
-                    <TableCell>{formatDate(e.date)}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(e.amount)}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          e.payment_status === "paid"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
-                        )}
+            <DataTable<DayToDayExpense>
+              columns={[
+                {
+                  id: "category",
+                  header: "Category",
+                  className: "capitalize",
+                  cell: (e) => e.category,
+                },
+                {
+                  id: "vendor",
+                  header: "Vendor",
+                  cell: (e) => e.vendor || "—",
+                },
+                {
+                  id: "date",
+                  header: "Date",
+                  cell: (e) => formatDate(e.date),
+                },
+                {
+                  id: "amount",
+                  header: "Amount",
+                  align: "right",
+                  cell: (e) => formatCurrency(e.amount),
+                },
+                {
+                  id: "payment",
+                  header: "Payment",
+                  cell: (e) => (
+                    <StatusBadge
+                      variant={
+                        e.payment_status === "paid" ? "success" : "warning"
+                      }
+                    >
+                      {e.payment_status}
+                    </StatusBadge>
+                  ),
+                },
+                {
+                  id: "receipt",
+                  header: "Receipt",
+                  cell: (e) =>
+                    e.receipt_url ? (
+                      <a
+                        href={e.receipt_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary inline-flex items-center gap-1 hover:underline"
                       >
-                        {e.payment_status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {e.receipt_url ? (
-                        <a
-                          href={e.receipt_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary inline-flex items-center gap-1 hover:underline"
-                        >
-                          View <ExternalLink className="size-3" />
-                        </a>
-                      ) : (
-                        "—"
-                      )}
-                    </TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => {
-                            setEditingDayExpense(e);
-                            setDaySheetOpen(true);
-                          }}
-                        >
-                          <Pencil className="size-4" />
-                        </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        View <ExternalLink className="size-3" />
+                      </a>
+                    ) : (
+                      "—"
+                    ),
+                },
+              ]}
+              data={dayExpenses}
+              getRowKey={(e) => e.id}
+              emptyMessage="No day-to-day expenses yet."
+              renderActions={
+                canEdit
+                  ? (e) => (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => {
+                          setEditingDayExpense(e);
+                          setDaySheetOpen(true);
+                        }}
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    )
+                  : undefined
+              }
+              showActions={canEdit}
+            />
           )}
         </CardContent>
       </Card>

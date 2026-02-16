@@ -16,16 +16,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
+import DataTable from "@/components/shared/DataTable";
+import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import dateHelper from "@/lib/helper/date";
@@ -125,80 +118,82 @@ export default function EmployeesPage() {
             <p className="text-muted-foreground py-8 text-center text-sm">
               Loading…
             </p>
-          ) : employees.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center text-sm">
-              No employees found. Add one to get started.
-            </p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Employee ID</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead className="text-right">Salary</TableHead>
-                  <TableHead>Joining</TableHead>
-                  <TableHead>Status</TableHead>
-                  {canEdit && (
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {employees.map((emp) => (
-                  <TableRow key={emp.id}>
-                    <TableCell className="font-medium">
-                      {emp.full_name}
-                    </TableCell>
-                    <TableCell>{emp.employee_id ?? "—"}</TableCell>
-                    <TableCell>{emp.department || "—"}</TableCell>
-                    <TableCell>{emp.email}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(emp.monthly_salary)}
-                    </TableCell>
-                    <TableCell>{formatDate(emp.joining_date)}</TableCell>
-                    <TableCell>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-xs font-medium",
-                          emp.status === "active"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {emp.status}
-                      </span>
-                    </TableCell>
-                    {canEdit && (
-                      <TableCell>
-                        <div className="flex items-center gap-1">
+            <DataTable<Employee>
+              columns={[
+                {
+                  id: "name",
+                  header: "Name",
+                  className: "font-medium",
+                  cell: (emp) => emp.full_name,
+                },
+                {
+                  id: "employee_id",
+                  header: "Employee ID",
+                  cell: (emp) => emp.employee_id ?? "—",
+                },
+                {
+                  id: "department",
+                  header: "Department",
+                  cell: (emp) => emp.department || "—",
+                },
+                { id: "email", header: "Email", cell: (emp) => emp.email },
+                {
+                  id: "salary",
+                  header: "Salary",
+                  align: "right",
+                  cell: (emp) => formatCurrency(emp.monthly_salary),
+                },
+                {
+                  id: "joining",
+                  header: "Joining",
+                  cell: (emp) => formatDate(emp.joining_date),
+                },
+                {
+                  id: "status",
+                  header: "Status",
+                  cell: (emp) => (
+                    <StatusBadge
+                      variant={emp.status === "active" ? "success" : "muted"}
+                    >
+                      {emp.status}
+                    </StatusBadge>
+                  ),
+                },
+              ]}
+              data={employees}
+              getRowKey={(emp) => emp.id}
+              emptyMessage="No employees found. Add one to get started."
+              renderActions={
+                canEdit
+                  ? (emp) => (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => openEdit(emp)}
+                          title="Edit"
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        {emp.status === "active" && (
                           <Button
                             variant="ghost"
                             size="icon-sm"
-                            onClick={() => openEdit(emp)}
-                            title="Edit"
+                            onClick={() => handleDeactivate(emp)}
+                            title="Set Inactive"
+                            className="text-destructive hover:text-destructive"
                           >
-                            <Pencil className="size-4" />
+                            <UserX className="size-4" />
                           </Button>
-                          {emp.status === "active" && (
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() => handleDeactivate(emp)}
-                              title="Set Inactive"
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <UserX className="size-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        )}
+                      </div>
+                    )
+                  : undefined
+              }
+              showActions={canEdit}
+              actionsHeaderClassName="w-[100px]"
+            />
           )}
         </CardContent>
       </Card>
