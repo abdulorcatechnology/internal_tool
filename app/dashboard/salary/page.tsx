@@ -37,12 +37,7 @@ import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import currencyHelper from "@/lib/helper/currency";
 import dateHelper from "@/lib/helper/date";
 
-const STATUS_OPTIONS: { value: SalaryStatus | "all"; label: string }[] = [
-  { value: "all", label: "All statuses" },
-  { value: "pending", label: "Pending" },
-  { value: "paid", label: "Paid" },
-  { value: "deferred", label: "Deferred" },
-];
+import salaryOptions from "@/lib/options/salary";
 
 const MONTH_OPTIONS = monthHelper.getMonthOptions();
 const formatMonth = monthHelper.formatMonth;
@@ -159,7 +154,7 @@ export default function SalaryPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {STATUS_OPTIONS.map((o) => (
+                  {salaryOptions.STATUS_OPTIONS.map((o) => (
                     <SelectItem key={o.value} value={o.value}>
                       {o.label}
                     </SelectItem>
