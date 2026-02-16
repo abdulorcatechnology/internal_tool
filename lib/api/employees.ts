@@ -34,6 +34,19 @@ export async function fetchEmployees(
   return (data ?? []) as Employee[];
 }
 
+/** Distinct department names from all employees (for filter dropdowns). */
+export async function fetchDepartments(): Promise<string[]> {
+  const { data, error } = await supabase()
+    .from("employees")
+    .select("department");
+  if (error) throw error;
+  const set = new Set<string>();
+  (data ?? []).forEach((r: { department: string | null }) => {
+    if (r.department?.trim()) set.add(r.department.trim());
+  });
+  return Array.from(set).sort();
+}
+
 export async function fetchEmployeeById(id: string): Promise<Employee | null> {
   const { data, error } = await supabase()
     .from("employees")
@@ -126,6 +139,13 @@ export function useEmployees(filters?: EmployeesFilters) {
   return useQuery({
     queryKey: [...QUERY_KEY, filters] as const,
     queryFn: () => fetchEmployees(filters),
+  });
+}
+
+export function useDepartments() {
+  return useQuery({
+    queryKey: [...QUERY_KEY, "departments"] as const,
+    queryFn: fetchDepartments,
   });
 }
 

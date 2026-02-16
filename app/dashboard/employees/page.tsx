@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Plus, Pencil, UserX } from "lucide-react";
-import { useEmployees, useDeactivateEmployee } from "@/lib/api/employees";
+import { useEmployees, useDepartments, useDeactivateEmployee } from "@/lib/api/employees";
 import type { Employee, EmployeeStatus } from "@/types/employees";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,14 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
@@ -62,14 +54,9 @@ export default function EmployeesPage() {
   }, [statusFilter, departmentFilter]);
 
   const { data: employees = [], isLoading } = useEmployees(filters);
+  const { data: departments = [] } = useDepartments();
   const { data: profile } = useProfile();
   const deactivateMutation = useDeactivateEmployee();
-
-  const departments = useMemo(() => {
-    const set = new Set<string>();
-    employees.forEach((e) => e.department && set.add(e.department));
-    return Array.from(set).sort();
-  }, [employees]);
 
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
@@ -117,25 +104,21 @@ export default function EmployeesPage() {
           <CardTitle>Employee list</CardTitle>
           <CardDescription>Filter by status and department.</CardDescription>
           <div className="flex flex-wrap gap-4 pt-2">
-            <div className="flex items-center gap-2">
-              <SelectDropdown
-                label="Status"
-                options={STATUS_OPTIONS}
-                value={statusFilter}
-                onChange={(v) => setStatusFilter(v as EmployeeStatus | "all")}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <SelectDropdown
-                label="Department"
-                options={[
-                  { value: "all", label: "All departments" },
-                  ...departments.map((d) => ({ value: d, label: d })),
-                ]}
-                value={departmentFilter}
-                onChange={(v) => setDepartmentFilter(v as string)}
-              />
-            </div>
+            <SelectDropdown
+              label="Status"
+              options={STATUS_OPTIONS}
+              value={statusFilter}
+              onChange={(v) => setStatusFilter(v as EmployeeStatus | "all")}
+            />
+            <SelectDropdown
+              label="Department"
+              options={[
+                { value: "all", label: "All departments" },
+                ...departments.map((d) => ({ value: d, label: d })),
+              ]}
+              value={departmentFilter}
+              onChange={setDepartmentFilter}
+            />
           </div>
         </CardHeader>
         <CardContent>

@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import {
   Select,
   SelectContent,
@@ -7,29 +8,40 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { useId } from "react";
 
 interface SelectDropdownProps {
   label: string;
   options: { value: string; label: string }[];
   value: string;
   onChange: (value: string) => void;
+  placeholder?: string;
   className?: string;
+  triggerClassName?: string;
 }
 
-const SelectDropdown = ({
+export default function SelectDropdown({
   label,
   options,
   value,
   onChange,
-}: SelectDropdownProps) => {
+  placeholder = "Select…",
+  className,
+  triggerClassName = "w-[140px]",
+}: SelectDropdownProps) {
+  const id = useId();
+
   return (
-    <>
-      <Label className="text-muted-foreground whitespace-nowrap text-sm">
+    <div className={["flex items-center gap-2", className].filter(Boolean).join(" ")}>
+      <Label
+        htmlFor={id}
+        className="text-muted-foreground whitespace-nowrap text-sm"
+      >
         {label}
       </Label>
-      <Select value={value} onValueChange={(v) => onChange(v)}>
-        <SelectTrigger className="w-[140px]">
-          <SelectValue />
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger id={id} className={triggerClassName}>
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           {options.map((o) => (
@@ -39,8 +51,6 @@ const SelectDropdown = ({
           ))}
         </SelectContent>
       </Select>
-    </>
+    </div>
   );
-};
-
-export default SelectDropdown;
+}
