@@ -127,6 +127,31 @@ export async function uploadReceipt(
   return data.publicUrl;
 }
 
+/** Fetch all salary records for a calendar year (for analysis) */
+export async function fetchSalaryRecordsForYear(
+  year?: number
+): Promise<SalaryRecordWithEmployee[]> {
+  const y = year ?? new Date().getFullYear();
+  const start = `${y}-01-01`;
+  const end = `${y}-12-31`;
+  const { data, error } = await supabase()
+    .from("salary_records")
+    .select("*, employees(full_name, employee_id)")
+    .gte("month", start)
+    .lte("month", end)
+    .order("month", { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []) as SalaryRecordWithEmployee[];
+}
+
+export function useSalaryRecordsForYear(year?: number) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, "year", year ?? new Date().getFullYear()] as const,
+    queryFn: () => fetchSalaryRecordsForYear(year),
+  });
+}
+
 export function useSalaryRecords(filters?: SalaryFilters) {
   return useQuery({
     queryKey: [...QUERY_KEY, "list", filters] as const,

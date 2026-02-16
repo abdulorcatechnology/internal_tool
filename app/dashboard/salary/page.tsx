@@ -1,51 +1,22 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, ExternalLink } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { useSalaryRecords } from "@/lib/api/salary";
 import { useEmployees } from "@/lib/api/employees";
 import { useProfile } from "@/lib/api/profile";
 import type { SalaryRecordWithEmployee, SalaryStatus } from "@/types/salary";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import monthHelper from "@/lib/helper/month";
 import AddSalaryForm from "@/components/salary/AddSalaryForm";
-import currencyHelper from "@/lib/helper/currency";
-import dateHelper from "@/lib/helper/date";
-
-import salaryOptions from "@/lib/options/salary";
 import SalaryTable from "@/components/salary/SalaryTable";
+import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
 
-const MONTH_OPTIONS = monthHelper.getMonthOptions();
-const formatMonth = monthHelper.formatMonth;
-const formatCurrency = currencyHelper.formatCurrency;
-const formatDate = dateHelper.formatDate;
+type SalaryTab = "records" | "analysis";
 
 export default function SalaryPage() {
+  const [activeTab, setActiveTab] = useState<SalaryTab>("records");
   const [monthFilter, setMonthFilter] = useState<string>("");
   const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<SalaryStatus | "all">("all");
@@ -87,7 +58,7 @@ export default function SalaryPage() {
             Paid, or Deferred.
           </p>
         </div>
-        {canEdit && (
+        {canEdit && activeTab === "records" && (
           <Button onClick={openAdd}>
             <Plus className="size-4" />
             Add record
@@ -95,20 +66,56 @@ export default function SalaryPage() {
         )}
       </div>
 
-      <SalaryTable
-        monthFilter={monthFilter}
-        setMonthFilter={setMonthFilter}
-        employeeFilter={employeeFilter}
-        setEmployeeFilter={setEmployeeFilter}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        canEdit={canEdit}
-        records={records}
-        isLoading={isLoading}
-        employees={employees}
-        openEdit={openEdit}
-        openAdd={openAdd}
-      />
+      <div
+        role="tablist"
+        className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground"
+      >
+        <button
+          role="tab"
+          aria-selected={activeTab === "records"}
+          className={cn(
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            activeTab === "records"
+              ? "bg-background text-foreground shadow"
+              : "hover:bg-background/50 hover:text-foreground"
+          )}
+          onClick={() => setActiveTab("records")}
+        >
+          Records
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === "analysis"}
+          className={cn(
+            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            activeTab === "analysis"
+              ? "bg-background text-foreground shadow"
+              : "hover:bg-background/50 hover:text-foreground"
+          )}
+          onClick={() => setActiveTab("analysis")}
+        >
+          Analysis
+        </button>
+      </div>
+
+      {activeTab === "records" && (
+        <SalaryTable
+          monthFilter={monthFilter}
+          setMonthFilter={setMonthFilter}
+          employeeFilter={employeeFilter}
+          setEmployeeFilter={setEmployeeFilter}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          canEdit={canEdit}
+          records={records}
+          isLoading={isLoading}
+          employees={employees}
+          openEdit={openEdit}
+          openAdd={openAdd}
+        />
+      )}
+
+      {activeTab === "analysis" && <SalaryAnalysis />}
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">

@@ -6,6 +6,7 @@ import type {
   UpdateEmployeeInput,
   EmployeesFilters,
 } from "@/types/employees";
+import { createSalaryRecord } from "@/lib/api/salary";
 
 const QUERY_KEY = ["employees"] as const;
 
@@ -46,6 +47,11 @@ export async function fetchEmployeeById(id: string): Promise<Employee | null> {
   return data as Employee;
 }
 
+/** First day of month from YYYY-MM-DD (e.g. joining_date). */
+function monthFromDate(ymd: string): string {
+  return ymd.slice(0, 7) + "-01";
+}
+
 export async function createEmployee(
   input: CreateEmployeeInput
 ): Promise<Employee> {
@@ -65,7 +71,23 @@ export async function createEmployee(
     .select()
     .single();
   if (error) throw error;
-  return data as Employee;
+  const employee = data as Employee;
+
+  // Create one salary record for the joining month (pending, base = monthly_salary).
+  try {
+    await createSalaryRecord({
+      employee_id: employee.id,
+      month: monthFromDate(input.joining_date),
+      base_salary: employee.monthly_salary,
+      deductions: 0,
+      bonus: 0,
+      status: "pending",
+    });
+  } catch {
+    // Employee is already created; salary record can be added manually from Salary page.
+  }
+
+  return employee;
 }
 
 export async function updateEmployee(
@@ -122,6 +144,7 @@ export function useCreateEmployee() {
     mutationFn: createEmployee,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QUERY_KEY });
+      qc.invalidateQueries({ queryKey: ["salary"] });
     },
   });
 }
