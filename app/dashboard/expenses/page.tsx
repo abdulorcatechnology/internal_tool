@@ -44,8 +44,8 @@ import { cn } from "@/lib/utils";
 import currencyHelper from "@/lib/helper/currency";
 import dateHelper from "@/lib/helper/date";
 import expensesOptions from "@/lib/options/expenses";
-import DayToDayForm from "@/components/expenses/AddDayToDayExpenseForm";
-import FixedAssetForm from "@/components/expenses/AddFixedAsset";
+import DayToDayForm from "@/components/expenses/DayToDayExpense/AddDayToDayExpenseForm";
+import FixedAssetForm from "@/components/expenses/FixedAsset/AddFixedAsset";
 import Heading from "@/components/shared/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
