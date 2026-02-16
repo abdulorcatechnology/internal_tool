@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -22,19 +16,13 @@ import {
 } from "@/components/ui/card";
 import { useDashboardStats, usePayrollByMonth } from "@/lib/api/dashboard";
 import currencyHelper from "@/lib/helper/currency";
-
+import { payrollChartConfig } from "@/lib/options/dashboard";
 const formatCurrency = currencyHelper.formatCurrency;
-
-const payrollChartConfig = {
-  total: {
-    label: "Payroll",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig;
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: payrollByMonth = [], isLoading: chartLoading } = usePayrollByMonth();
+  const { data: payrollByMonth = [], isLoading: chartLoading } =
+    usePayrollByMonth();
 
   return (
     <div className="space-y-6">
@@ -54,7 +42,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">
-              {statsLoading ? "…" : formatCurrency(stats?.totalMonthlyPayroll ?? 0)}
+              {statsLoading
+                ? "…"
+                : formatCurrency(stats?.totalMonthlyPayroll ?? 0)}
             </span>
           </CardContent>
         </Card>
@@ -66,7 +56,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">
-              {statsLoading ? "…" : stats?.pendingSalariesCount ?? 0}
+              {statsLoading ? "…" : (stats?.pendingSalariesCount ?? 0)}
             </span>
           </CardContent>
         </Card>
@@ -78,7 +68,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">
-              {statsLoading ? "…" : formatCurrency(stats?.annualPayrollYTD ?? 0)}
+              {statsLoading
+                ? "…"
+                : formatCurrency(stats?.annualPayrollYTD ?? 0)}
             </span>
           </CardContent>
         </Card>
@@ -90,7 +82,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">
-              {statsLoading ? "…" : formatCurrency(stats?.expensesThisMonth ?? 0)}
+              {statsLoading
+                ? "…"
+                : formatCurrency(stats?.expensesThisMonth ?? 0)}
             </span>
           </CardContent>
         </Card>
@@ -102,7 +96,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">
-              {statsLoading ? "…" : formatCurrency(stats?.fixedAssetsTotalValue ?? 0)}
+              {statsLoading
+                ? "…"
+                : formatCurrency(stats?.fixedAssetsTotalValue ?? 0)}
             </span>
           </CardContent>
         </Card>
@@ -123,7 +119,10 @@ export default function DashboardPage() {
               No payroll data yet.
             </div>
           ) : (
-            <ChartContainer config={payrollChartConfig} className="h-[280px] w-full">
+            <ChartContainer
+              config={payrollChartConfig}
+              className="h-[280px] w-full"
+            >
               <BarChart
                 data={payrollByMonth}
                 margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
