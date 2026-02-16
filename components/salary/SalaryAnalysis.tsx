@@ -35,6 +35,7 @@ import currencyHelper from "@/lib/helper/currency";
 import monthHelper from "@/lib/helper/month";
 import { payrollChartConfig } from "@/lib/options/dashboard";
 import type { SalaryRecordWithEmployee } from "@/types/salary";
+import OverviewCard from "../dashboard/OverviewCard";
 
 const formatCurrency = currencyHelper.formatCurrency;
 const formatMonth = monthHelper.formatMonth;
@@ -94,7 +95,8 @@ function useSalaryAnalysis(year?: number) {
           paid: 0,
           deferred: 0,
           name: (r as SalaryRecordWithEmployee).employees?.full_name ?? "—",
-          employeeIdLabel: (r as SalaryRecordWithEmployee).employees?.employee_id ?? null,
+          employeeIdLabel:
+            (r as SalaryRecordWithEmployee).employees?.employee_id ?? null,
         });
       }
       const emp = ytdByEmployee.get(empId)!;
@@ -126,7 +128,7 @@ function useSalaryAnalysis(year?: number) {
           paidCount: data.paid,
           deferredCount: data.deferred,
         };
-      }
+      },
     );
 
     const monthList: MonthTotal[] = [];
@@ -217,7 +219,10 @@ export default function SalaryAnalysis() {
             <TableBody>
               {ytdList.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground text-center py-8">
+                  <TableCell
+                    colSpan={5}
+                    className="text-muted-foreground text-center py-8"
+                  >
                     No salary records this year.
                   </TableCell>
                 </TableRow>
@@ -231,9 +236,13 @@ export default function SalaryAnalysis() {
                     <TableCell className="text-right">
                       {formatCurrency(e.ytd)}
                     </TableCell>
-                    <TableCell className="text-right">{e.pendingCount}</TableCell>
+                    <TableCell className="text-right">
+                      {e.pendingCount}
+                    </TableCell>
                     <TableCell className="text-right">{e.paidCount}</TableCell>
-                    <TableCell className="text-right">{e.deferredCount}</TableCell>
+                    <TableCell className="text-right">
+                      {e.deferredCount}
+                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -322,61 +331,30 @@ export default function SalaryAnalysis() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total annual payroll
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-2xl font-bold">
-                  {formatCurrency(totalPayroll)}
-                </span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Highest payroll month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-xl font-bold">
-                  {highestMonth
-                    ? `${formatMonth(highestMonth.month)} (${formatCurrency(highestMonth.total)})`
-                    : "—"}
-                </span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Lowest payroll month
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-xl font-bold">
-                  {lowestMonth
-                    ? `${formatMonth(lowestMonth.month)} (${formatCurrency(lowestMonth.total)})`
-                    : "—"}
-                </span>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Avg salary per employee
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <span className="text-2xl font-bold">
-                  {formatCurrency(averagePerEmployee)}
-                </span>
-                <p className="text-muted-foreground text-xs mt-1">
-                  {uniqueEmployees} employee{uniqueEmployees !== 1 ? "s" : ""} with records
-                </p>
-              </CardContent>
-            </Card>
+            <OverviewCard
+              title="Total annual payroll"
+              value={formatCurrency(totalPayroll)}
+            />
+            <OverviewCard
+              title="Highest payroll month"
+              value={
+                highestMonth
+                  ? `${formatMonth(highestMonth.month)} (${formatCurrency(highestMonth.total)})`
+                  : "—"
+              }
+            />
+            <OverviewCard
+              title="Lowest payroll month"
+              value={
+                lowestMonth
+                  ? `${formatMonth(lowestMonth.month)} (${formatCurrency(lowestMonth.total)})`
+                  : "—"
+              }
+            />
+            <OverviewCard
+              title="Avg salary per employee"
+              value={formatCurrency(averagePerEmployee)}
+            />
           </div>
 
           <div>
@@ -419,7 +397,9 @@ export default function SalaryAnalysis() {
           </div>
 
           <div>
-            <h4 className="text-sm font-medium mb-2">Pending vs Paid (company)</h4>
+            <h4 className="text-sm font-medium mb-2">
+              Pending vs Paid (company)
+            </h4>
             <p className="text-muted-foreground text-sm">
               Pending: {statusCounts.pending} · Paid: {statusCounts.paid} ·
               Deferred: {statusCounts.deferred}

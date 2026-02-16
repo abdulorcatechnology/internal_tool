@@ -29,10 +29,8 @@ import {
   usePayrollAndExpensesByMonth,
 } from "@/lib/api/dashboard";
 import currencyHelper from "@/lib/helper/currency";
-import {
-  payrollChartConfig,
-  trendChartConfig,
-} from "@/lib/options/dashboard";
+import { payrollChartConfig, trendChartConfig } from "@/lib/options/dashboard";
+import OverviewCard from "@/components/dashboard/OverviewCard";
 
 const formatCurrency = currencyHelper.formatCurrency;
 
@@ -40,10 +38,8 @@ export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: payrollByMonth = [], isLoading: chartLoading } =
     usePayrollByMonth();
-  const {
-    data: trendData = [],
-    isLoading: trendLoading,
-  } = usePayrollAndExpensesByMonth();
+  const { data: trendData = [], isLoading: trendLoading } =
+    usePayrollAndExpensesByMonth();
 
   return (
     <div className="space-y-6">
@@ -55,74 +51,35 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total monthly payroll
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {statsLoading
-                ? "…"
-                : formatCurrency(stats?.totalMonthlyPayroll ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Pending salaries
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {statsLoading ? "…" : (stats?.pendingSalariesCount ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Annual payroll (YTD)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {statsLoading
-                ? "…"
-                : formatCurrency(stats?.annualPayrollYTD ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Office expenses (this month)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {statsLoading
-                ? "…"
-                : formatCurrency(stats?.expensesThisMonth ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Fixed assets (total value)
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {statsLoading
-                ? "…"
-                : formatCurrency(stats?.fixedAssetsTotalValue ?? 0)}
-            </span>
-          </CardContent>
-        </Card>
+        <OverviewCard
+          title="Total monthly payroll"
+          value={formatCurrency(stats?.totalMonthlyPayroll ?? 0)}
+          loading={statsLoading}
+        />
+
+        <OverviewCard
+          title="Pending salaries"
+          value={formatCurrency(stats?.pendingSalariesCount ?? 0)}
+          loading={statsLoading}
+        />
+
+        <OverviewCard
+          title="Annual payroll (YTD)"
+          value={formatCurrency(stats?.annualPayrollYTD ?? 0)}
+          loading={statsLoading}
+        />
+
+        <OverviewCard
+          title="Office expenses (this month)"
+          value={formatCurrency(stats?.expensesThisMonth ?? 0)}
+          loading={statsLoading}
+        />
+
+        <OverviewCard
+          title="Fixed assets (total value)"
+          value={formatCurrency(stats?.fixedAssetsTotalValue ?? 0)}
+          loading={statsLoading}
+        />
       </div>
 
       <Card>
