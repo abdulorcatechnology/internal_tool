@@ -31,6 +31,7 @@ import {
 import currencyHelper from "@/lib/helper/currency";
 import { payrollChartConfig, trendChartConfig } from "@/lib/options/dashboard";
 import OverviewCard from "@/components/dashboard/OverviewCard";
+import Heading from "@/components/layout/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
 
@@ -43,12 +44,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of payroll and expenses.
-        </p>
-      </div>
+      <Heading
+        title="Dashboard"
+        description="Overview of payroll and expenses."
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <OverviewCard

@@ -34,6 +34,7 @@ import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import dateHelper from "@/lib/helper/date";
 import currencyHelper from "@/lib/helper/currency";
+import Heading from "@/components/layout/Heading";
 
 const STATUS_OPTIONS: { value: EmployeeStatus | "all"; label: string }[] = [
   { value: "all", label: "All statuses" },
@@ -96,12 +97,10 @@ export default function EmployeesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-          <p className="text-muted-foreground">
-            Add, edit, and manage employees. Use Inactive to soft-delete.
-          </p>
-        </div>
+        <Heading
+          title="Employees"
+          description="Add, edit, and manage employees. Use Inactive to soft-delete."
+        />
         {canEdit && (
           <Button onClick={openAdd}>
             <Plus className="size-4" />

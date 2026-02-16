@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import SalaryTable from "@/components/salary/SalaryTable";
 import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
+import Heading from "@/components/layout/Heading";
 
 type SalaryTab = "records" | "analysis";
 
@@ -51,13 +52,10 @@ export default function SalaryPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Salary</h1>
-          <p className="text-muted-foreground">
-            Monthly salary records. One per employee per month; mark as Pending,
-            Paid, or Deferred.
-          </p>
-        </div>
+        <Heading
+          title="Salary"
+          description="Records and analysis of salary data."
+        />
         {canEdit && activeTab === "records" && (
           <Button onClick={openAdd}>
             <Plus className="size-4" />
@@ -77,7 +75,7 @@ export default function SalaryPage() {
             "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
             activeTab === "records"
               ? "bg-background text-foreground shadow"
-              : "hover:bg-background/50 hover:text-foreground"
+              : "hover:bg-background/50 hover:text-foreground",
           )}
           onClick={() => setActiveTab("records")}
         >
@@ -90,7 +88,7 @@ export default function SalaryPage() {
             "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
             activeTab === "analysis"
               ? "bg-background text-foreground shadow"
-              : "hover:bg-background/50 hover:text-foreground"
+              : "hover:bg-background/50 hover:text-foreground",
           )}
           onClick={() => setActiveTab("analysis")}
         >

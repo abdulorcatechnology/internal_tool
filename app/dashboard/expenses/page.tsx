@@ -46,6 +46,7 @@ import dateHelper from "@/lib/helper/date";
 import expensesOptions from "@/lib/options/expenses";
 import DayToDayForm from "@/components/expenses/AddDayToDayExpenseForm";
 import FixedAssetForm from "@/components/expenses/AddFixedAsset";
+import Heading from "@/components/layout/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
 const formatDate = dateHelper.formatDate;
@@ -99,14 +100,10 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Office Expenses
-        </h1>
-        <p className="text-muted-foreground">
-          Fixed assets and day-to-day expenses.
-        </p>
-      </div>
+      <Heading
+        title="Office Expenses"
+        description="Fixed assets and day-to-day expenses."
+      />
 
       {/* Fixed assets */}
       <Card>
