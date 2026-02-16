@@ -24,9 +24,22 @@ function nextMonth(ymd: string): string {
   return d.toISOString().slice(0, 10);
 }
 
+function getCurrentMonthYMD(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getTwelveMonthsAgoYMD(): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() - 11);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export default {
   getMonthOptions: calculateLast24Months,
   formatMonth: formatMonthAndYear,
   monthToDate: monthToDate,
   nextMonth: nextMonth,
+  getCurrentMonthYMD: getCurrentMonthYMD,
+  getTwelveMonthsAgoYMD: getTwelveMonthsAgoYMD,
 };
