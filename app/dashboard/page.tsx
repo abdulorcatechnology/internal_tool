@@ -1,11 +1,20 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
-  ChartConfig,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Line,
+  LineChart,
+} from "recharts";
+import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import {
   Card,
@@ -14,15 +23,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useDashboardStats, usePayrollByMonth } from "@/lib/api/dashboard";
+import {
+  useDashboardStats,
+  usePayrollByMonth,
+  usePayrollAndExpensesByMonth,
+} from "@/lib/api/dashboard";
 import currencyHelper from "@/lib/helper/currency";
-import { payrollChartConfig } from "@/lib/options/dashboard";
+import {
+  payrollChartConfig,
+  trendChartConfig,
+} from "@/lib/options/dashboard";
+
 const formatCurrency = currencyHelper.formatCurrency;
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: payrollByMonth = [], isLoading: chartLoading } =
     usePayrollByMonth();
+  const {
+    data: trendData = [],
+    isLoading: trendLoading,
+  } = usePayrollAndExpensesByMonth();
 
   return (
     <div className="space-y-6">
@@ -153,6 +174,189 @@ export default function DashboardPage() {
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Expense vs Payroll comparison */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Expense vs Payroll</CardTitle>
+          <CardDescription>
+            Compare monthly payroll and office expenses side by side.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {trendLoading ? (
+            <div className="flex h-[280px] items-center justify-center text-muted-foreground">
+              Loading…
+            </div>
+          ) : trendData.length === 0 ? (
+            <div className="flex h-[280px] items-center justify-center rounded-lg border border-dashed bg-muted/30 text-muted-foreground">
+              No data yet.
+            </div>
+          ) : (
+            <ChartContainer
+              config={trendChartConfig}
+              className="h-[280px] w-full"
+            >
+              <BarChart
+                data={trendData}
+                margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => formatCurrency(v)}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(v) => formatCurrency(Number(v))}
+                    />
+                  }
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar
+                  dataKey="payroll"
+                  fill="var(--color-payroll)"
+                  radius={[4, 4, 0, 0]}
+                  name="Payroll"
+                />
+                <Bar
+                  dataKey="expenses"
+                  fill="var(--color-expenses)"
+                  radius={[4, 4, 0, 0]}
+                  name="Expenses"
+                />
+              </BarChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Yearly trend – Payroll */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Yearly trend – Payroll</CardTitle>
+          <CardDescription>
+            Total payroll by month over the last 12 months.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {trendLoading ? (
+            <div className="flex h-[280px] items-center justify-center text-muted-foreground">
+              Loading…
+            </div>
+          ) : trendData.length === 0 ? (
+            <div className="flex h-[280px] items-center justify-center rounded-lg border border-dashed bg-muted/30 text-muted-foreground">
+              No data yet.
+            </div>
+          ) : (
+            <ChartContainer
+              config={payrollChartConfig}
+              className="h-[280px] w-full"
+            >
+              <LineChart
+                data={trendData}
+                margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => formatCurrency(v)}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(v) => formatCurrency(Number(v))}
+                    />
+                  }
+                />
+                <Line
+                  type="monotone"
+                  dataKey="payroll"
+                  stroke="var(--color-total)"
+                  strokeWidth={2}
+                  dot={{ fill: "var(--color-total)" }}
+                />
+              </LineChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Yearly trend – Expenses */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Yearly trend – Expenses</CardTitle>
+          <CardDescription>
+            Office expenses by month over the last 12 months.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {trendLoading ? (
+            <div className="flex h-[280px] items-center justify-center text-muted-foreground">
+              Loading…
+            </div>
+          ) : trendData.length === 0 ? (
+            <div className="flex h-[280px] items-center justify-center rounded-lg border border-dashed bg-muted/30 text-muted-foreground">
+              No data yet.
+            </div>
+          ) : (
+            <ChartContainer
+              config={trendChartConfig}
+              className="h-[280px] w-full"
+            >
+              <LineChart
+                data={trendData}
+                margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(v) => formatCurrency(v)}
+                />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(v) => formatCurrency(Number(v))}
+                    />
+                  }
+                />
+                <Line
+                  type="monotone"
+                  dataKey="expenses"
+                  stroke="var(--color-expenses)"
+                  strokeWidth={2}
+                  dot={{ fill: "var(--color-expenses)" }}
+                />
+              </LineChart>
             </ChartContainer>
           )}
         </CardContent>

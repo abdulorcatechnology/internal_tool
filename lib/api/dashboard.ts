@@ -18,6 +18,69 @@ export type DashboardStats = {
 
 export type PayrollByMonth = { month: string; total: number; label: string };
 
+export type PayrollAndExpensesByMonth = {
+  month: string;
+  label: string;
+  payroll: number;
+  expenses: number;
+};
+
+export async function fetchPayrollAndExpensesByMonth(): Promise<
+  PayrollAndExpensesByMonth[]
+> {
+  const startYm = monthHelper.getTwelveMonthsAgoYMD();
+  const endYm = monthHelper.getCurrentMonthYMD();
+  const startDate = monthHelper.monthToDate(startYm);
+  const endDate = monthHelper.nextMonth(monthHelper.monthToDate(endYm));
+
+  const [
+    { data: salaryRecords, error: salaryError },
+    { data: dayExpenses, error: expensesError },
+  ] = await Promise.all([
+    supabase()
+      .from("salary_records")
+      .select("month, net_salary")
+      .gte("month", startDate)
+      .lt("month", endDate),
+    supabase()
+      .from("day_to_day_expenses")
+      .select("date, amount")
+      .gte("date", startDate)
+      .lt("date", endDate),
+  ]);
+
+  if (salaryError) throw salaryError;
+  if (expensesError) throw expensesError;
+
+  const payrollByMonth = new Map<string, number>();
+  const expensesByMonth = new Map<string, number>();
+
+  for (const r of (salaryRecords ?? []) as { month: string; net_salary: number }[]) {
+    const ym = r.month.slice(0, 7);
+    payrollByMonth.set(ym, (payrollByMonth.get(ym) ?? 0) + Number(r.net_salary));
+  }
+  for (const r of (dayExpenses ?? []) as { date: string; amount: number }[]) {
+    const ym = r.date.slice(0, 7);
+    expensesByMonth.set(ym, (expensesByMonth.get(ym) ?? 0) + Number(r.amount));
+  }
+
+  const result: PayrollAndExpensesByMonth[] = [];
+  const d = new Date(startYm + "-01");
+  const end = new Date(endYm + "-01");
+  while (d <= end) {
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    result.push({
+      month: ym,
+      label: monthHelper.formatMonth(ym),
+      payroll: payrollByMonth.get(ym) ?? 0,
+      expenses: expensesByMonth.get(ym) ?? 0,
+    });
+    d.setMonth(d.getMonth() + 1);
+  }
+
+  return result.reverse();
+}
+
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const now = new Date();
   const currentYm = monthHelper.getCurrentMonthYMD();
@@ -129,5 +192,12 @@ export function usePayrollByMonth() {
   return useQuery({
     queryKey: [...DASHBOARD_KEY, "payrollByMonth"] as const,
     queryFn: fetchPayrollByMonth,
+  });
+}
+
+export function usePayrollAndExpensesByMonth() {
+  return useQuery({
+    queryKey: [...DASHBOARD_KEY, "payrollAndExpensesByMonth"] as const,
+    queryFn: fetchPayrollAndExpensesByMonth,
   });
 }
