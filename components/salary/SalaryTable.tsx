@@ -23,14 +23,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import monthHelper from "@/lib/helper/month";
 import AddSalaryForm from "@/components/salary/AddSalaryForm";
@@ -39,6 +31,7 @@ import dateHelper from "@/lib/helper/date";
 
 import salaryOptions from "@/lib/options/salary";
 import { Employee } from "@/types/employees";
+import SelectDropdown from "../shared/SelectDropdown";
 
 const MONTH_OPTIONS = monthHelper.getMonthOptions();
 const formatMonth = monthHelper.formatMonth;
@@ -83,67 +76,32 @@ const SalaryTable = ({
             Filter by month, employee, and status.
           </CardDescription>
           <div className="flex flex-wrap gap-4 pt-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-muted-foreground whitespace-nowrap text-sm">
-                Month
-              </Label>
-              <Select
-                value={monthFilter || "all"}
-                onValueChange={(v) => setMonthFilter(v === "all" ? "" : v)}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All months" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All months</SelectItem>
-                  {MONTH_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-muted-foreground whitespace-nowrap text-sm">
-                Employee
-              </Label>
-              <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All employees</SelectItem>
-                  {employees.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.full_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-muted-foreground whitespace-nowrap text-sm">
-                Status
-              </Label>
-              <Select
-                value={statusFilter}
-                onValueChange={(v) =>
-                  setStatusFilter(v as SalaryStatus | "all")
-                }
-              >
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {salaryOptions.STATUS_OPTIONS.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>
-                      {o.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <SelectDropdown
+              label="Month"
+              options={[
+                { value: "all", label: "All months" },
+                ...MONTH_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+              ]}
+              value={monthFilter || "all"}
+              onChange={(v) => setMonthFilter(v === "all" ? "" : v)}
+            />
+            <SelectDropdown
+              label="Employee"
+              options={[
+                { value: "all", label: "All employees" },
+                ...employees.map((e) => ({ value: e.id, label: e.full_name })),
+              ]}
+              value={employeeFilter || "all"}
+              onChange={setEmployeeFilter}
+            />
+            <SelectDropdown
+              label="Status"
+              options={salaryOptions.STATUS_OPTIONS}
+              value={statusFilter}
+              onChange={(v) =>
+                setStatusFilter(v === "all" ? "all" : (v as SalaryStatus))
+              }
+            />
           </div>
         </CardHeader>
         <CardContent>

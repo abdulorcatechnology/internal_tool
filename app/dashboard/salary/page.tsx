@@ -13,6 +13,7 @@ import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import SalaryTable from "@/components/salary/SalaryTable";
 import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
 import Heading from "@/components/shared/Heading";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type SalaryTab = "records" | "analysis";
 
@@ -29,7 +30,8 @@ export default function SalaryPage() {
     const f: { month?: string; employee_id?: string; status?: SalaryStatus } =
       {};
     if (monthFilter) f.month = monthFilter;
-    if (employeeFilter !== "all") f.employee_id = employeeFilter;
+    if (employeeFilter && employeeFilter !== "all")
+      f.employee_id = employeeFilter;
     if (statusFilter !== "all") f.status = statusFilter;
     return f;
   }, [monthFilter, employeeFilter, statusFilter]);
@@ -66,56 +68,34 @@ export default function SalaryPage() {
         )}
       </div>
 
-      <div
-        role="tablist"
-        className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground"
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as SalaryTab)}
       >
-        <button
-          role="tab"
-          aria-selected={activeTab === "records"}
-          className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-            activeTab === "records"
-              ? "bg-background text-foreground shadow"
-              : "hover:bg-background/50 hover:text-foreground",
-          )}
-          onClick={() => setActiveTab("records")}
-        >
-          Records
-        </button>
-        <button
-          role="tab"
-          aria-selected={activeTab === "analysis"}
-          className={cn(
-            "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-            activeTab === "analysis"
-              ? "bg-background text-foreground shadow"
-              : "hover:bg-background/50 hover:text-foreground",
-          )}
-          onClick={() => setActiveTab("analysis")}
-        >
-          Analysis
-        </button>
-      </div>
-
-      {activeTab === "records" && (
-        <SalaryTable
-          monthFilter={monthFilter}
-          setMonthFilter={setMonthFilter}
-          employeeFilter={employeeFilter}
-          setEmployeeFilter={setEmployeeFilter}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          canEdit={canEdit}
-          records={records}
-          isLoading={isLoading}
-          employees={employees}
-          openEdit={openEdit}
-          openAdd={openAdd}
-        />
-      )}
-
-      {activeTab === "analysis" && <SalaryAnalysis />}
+        <TabsList>
+          <TabsTrigger value="records">Records</TabsTrigger>
+          <TabsTrigger value="analysis">Analysis</TabsTrigger>
+        </TabsList>
+        <TabsContent value="records">
+          <SalaryTable
+            monthFilter={monthFilter}
+            setMonthFilter={setMonthFilter}
+            employeeFilter={employeeFilter}
+            setEmployeeFilter={setEmployeeFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            canEdit={canEdit}
+            records={records}
+            isLoading={isLoading}
+            employees={employees}
+            openEdit={openEdit}
+            openAdd={openAdd}
+          />
+        </TabsContent>
+        <TabsContent value="analysis">
+          <SalaryAnalysis />
+        </TabsContent>
+      </Tabs>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
