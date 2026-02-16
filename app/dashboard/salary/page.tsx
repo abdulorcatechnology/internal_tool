@@ -52,10 +52,12 @@ export default function SalaryPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Heading
-          title="Salary"
-          description="Records and analysis of salary data."
-        />
+        <div>
+          <Heading
+            title="Salary"
+            description="Records and analysis of salary data."
+          />
+        </div>
         {canEdit && activeTab === "records" && (
           <Button onClick={openAdd}>
             <Plus className="size-4" />

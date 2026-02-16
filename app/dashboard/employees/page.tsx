@@ -97,10 +97,12 @@ export default function EmployeesPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Heading
-          title="Employees"
-          description="Add, edit, and manage employees. Use Inactive to soft-delete."
-        />
+        <div>
+          <Heading
+            title="Employees"
+            description="Add, edit, and manage employees. Use Inactive to soft-delete."
+          />
+        </div>
         {canEdit && (
           <Button onClick={openAdd}>
             <Plus className="size-4" />

@@ -44,11 +44,12 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <Heading
-        title="Dashboard"
-        description="Overview of payroll and expenses."
-      />
-
+      <div>
+        <Heading
+          title="Dashboard"
+          description="Overview of payroll and expenses."
+        />
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <OverviewCard
           title="Total monthly payroll"

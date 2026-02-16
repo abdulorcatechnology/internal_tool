@@ -100,10 +100,12 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-8">
-      <Heading
-        title="Office Expenses"
-        description="Fixed assets and day-to-day expenses."
-      />
+      <div>
+        <Heading
+          title="Expenses"
+          description="Laptops, servers, phones, furniture. Utilities, rent, software, travel, etc."
+        />
+      </div>
 
       {/* Fixed assets */}
       <Card>
