@@ -59,7 +59,7 @@ export default function DashboardPage() {
 
         <OverviewCard
           title="Pending salaries"
-          value={formatCurrency(stats?.pendingSalariesCount ?? 0)}
+          value={stats?.pendingSalariesCount ?? 0}
           loading={statsLoading}
         />
 
