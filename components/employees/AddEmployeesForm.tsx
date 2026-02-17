@@ -82,11 +82,15 @@ export default function AddEmployeesForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const payload: CreateEmployeeInput = {
+      ...form,
+      department_id: form.department_id && form.department_id !== "__none__" ? form.department_id : null,
+    };
     try {
       if (isEdit) {
-        await updateMutation.mutateAsync({ id: employee.id, input: form });
+        await updateMutation.mutateAsync({ id: employee.id, input: payload });
       } else {
-        await createMutation.mutateAsync(form);
+        await createMutation.mutateAsync(payload);
       }
       onSuccess();
     } catch (_) {
@@ -139,15 +143,16 @@ export default function AddEmployeesForm({
             </p>
           ) : (
             <Select
-              value={form.department_id ?? undefined}
+              value={form.department_id ?? "__none__"}
               onValueChange={(v) =>
-                setForm((p) => ({ ...p, department_id: v || null }))
+                setForm((p) => ({ ...p, department_id: v === "__none__" ? null : v }))
               }
             >
               <SelectTrigger id="department">
                 <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="__none__">No department</SelectItem>
                 {departmentOptions.map((d) => (
                   <SelectItem key={d.id} value={d.id}>
                     {d.name}
