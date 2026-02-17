@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useCreateEmployee, useUpdateEmployee } from "@/lib/api/employees";
+import { useDepartments } from "@/lib/api/department";
 import type {
   Employee,
   CreateEmployeeInput,
@@ -36,7 +37,7 @@ export default function AddEmployeesForm({
   const [form, setForm] = useState<CreateEmployeeInput>({
     full_name: employee?.full_name ?? "",
     employee_id: employee?.employee_id ?? "",
-    department: employee?.department ?? "",
+    department_id: employee?.department_id ?? null,
     role: employee?.role ?? "",
     email: employee?.email ?? "",
     monthly_salary: employee?.monthly_salary ?? 0,
@@ -50,7 +51,7 @@ export default function AddEmployeesForm({
     setForm({
       full_name: employee?.full_name ?? "",
       employee_id: employee?.employee_id ?? "",
-      department: employee?.department ?? "",
+      department_id: employee?.department_id ?? null,
       role: employee?.role ?? "",
       email: employee?.email ?? "",
       monthly_salary: employee?.monthly_salary ?? 0,
@@ -60,6 +61,19 @@ export default function AddEmployeesForm({
       status: employee?.status ?? "active",
     });
   }, [employee]);
+
+  const { data: departments = [] } = useDepartments();
+  const departmentOptions = useMemo(() => {
+    const byId = new Map(departments.map((d) => [d.id, d]));
+    if (
+      employee?.department_id &&
+      !byId.has(employee.department_id) &&
+      employee.departments
+    ) {
+      return [{ id: employee.department_id, name: employee.departments.name }, ...departments];
+    }
+    return [...departments];
+  }, [departments, employee?.department_id, employee?.departments]);
 
   const createMutation = useCreateEmployee();
   const updateMutation = useUpdateEmployee();
@@ -119,13 +133,29 @@ export default function AddEmployeesForm({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="department">Department</Label>
-          <Input
-            id="department"
-            value={form.department}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, department: e.target.value }))
-            }
-          />
+          {departmentOptions.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              Add departments in Settings first.
+            </p>
+          ) : (
+            <Select
+              value={form.department_id ?? undefined}
+              onValueChange={(v) =>
+                setForm((p) => ({ ...p, department_id: v || null }))
+              }
+            >
+              <SelectTrigger id="department">
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departmentOptions.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="role">Role</Label>

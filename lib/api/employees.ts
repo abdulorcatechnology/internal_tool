@@ -19,11 +19,11 @@ export async function fetchEmployees(
 ): Promise<Employee[]> {
   let q = supabase()
     .from("employees")
-    .select("*")
+    .select("*, departments(id, name)")
     .order("created_at", { ascending: false });
 
-  if (filters?.department) {
-    q = q.eq("department", filters.department);
+  if (filters?.department_id) {
+    q = q.eq("department_id", filters.department_id);
   }
   if (filters?.status) {
     q = q.eq("status", filters.status);
@@ -34,23 +34,10 @@ export async function fetchEmployees(
   return (data ?? []) as Employee[];
 }
 
-/** Distinct department names from all employees (for filter dropdowns). */
-export async function fetchDepartments(): Promise<string[]> {
-  const { data, error } = await supabase()
-    .from("employees")
-    .select("department");
-  if (error) throw error;
-  const set = new Set<string>();
-  (data ?? []).forEach((r: { department: string | null }) => {
-    if (r.department?.trim()) set.add(r.department.trim());
-  });
-  return Array.from(set).sort();
-}
-
 export async function fetchEmployeeById(id: string): Promise<Employee | null> {
   const { data, error } = await supabase()
     .from("employees")
-    .select("*")
+    .select("*, departments(id, name)")
     .eq("id", id)
     .single();
   if (error) {
@@ -73,7 +60,7 @@ export async function createEmployee(
     .insert({
       full_name: input.full_name,
       employee_id: input.employee_id?.trim() || null,
-      department: input.department ?? "",
+      department_id: input.department_id ?? null,
       role: input.role ?? null,
       email: input.email,
       monthly_salary: Number(input.monthly_salary),
@@ -110,7 +97,7 @@ export async function updateEmployee(
   const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (input.full_name !== undefined) payload.full_name = input.full_name;
   if (input.employee_id !== undefined) payload.employee_id = input.employee_id?.trim() || null;
-  if (input.department !== undefined) payload.department = input.department;
+  if (input.department_id !== undefined) payload.department_id = input.department_id;
   if (input.role !== undefined) payload.role = input.role;
   if (input.email !== undefined) payload.email = input.email;
   if (input.monthly_salary !== undefined)
@@ -139,13 +126,6 @@ export function useEmployees(filters?: EmployeesFilters) {
   return useQuery({
     queryKey: [...QUERY_KEY, filters] as const,
     queryFn: () => fetchEmployees(filters),
-  });
-}
-
-export function useDepartments() {
-  return useQuery({
-    queryKey: [...QUERY_KEY, "departments"] as const,
-    queryFn: fetchDepartments,
   });
 }
 
