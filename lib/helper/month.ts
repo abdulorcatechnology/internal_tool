@@ -35,6 +35,15 @@ function getTwelveMonthsAgoYMD(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function formatDate(d: string | null) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export default {
   getMonthOptions: calculateLast24Months,
   formatMonth: formatMonthAndYear,
@@ -42,4 +51,5 @@ export default {
   nextMonth: nextMonth,
   getCurrentMonthYMD: getCurrentMonthYMD,
   getTwelveMonthsAgoYMD: getTwelveMonthsAgoYMD,
+  formatDate: formatDate,
 };

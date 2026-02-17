@@ -22,13 +22,13 @@ import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
-import dateHelper from "@/lib/helper/date";
+import monthHelper from "@/lib/helper/month";
 import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
 import { STATUS_OPTIONS } from "@/lib/options/employees";
 
-const formatDate = dateHelper.formatDate;
+const formatDate = monthHelper.formatDate;
 const formatCurrency = currencyHelper.formatCurrency;
 
 export default function EmployeesPage() {
