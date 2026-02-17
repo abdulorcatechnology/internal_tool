@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Pencil, ExternalLink } from "lucide-react";
+import { Pencil, ExternalLink } from "lucide-react";
 import type { SalaryRecordWithEmployee, SalaryStatus } from "@/types/salary";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,34 +10,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import monthHelper from "@/lib/helper/month";
-import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import currencyHelper from "@/lib/helper/currency";
-import dateHelper from "@/lib/helper/date";
-
 import salaryOptions from "@/lib/options/salary";
-import { Employee } from "@/types/employees";
 import SelectDropdown from "../shared/SelectDropdown";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const MONTH_OPTIONS = monthHelper.getMonthOptions();
 const formatMonth = monthHelper.formatMonth;
 const formatCurrency = currencyHelper.formatCurrency;
-const formatDate = dateHelper.formatDate;
+const formatDate = monthHelper.formatDate;
 
 interface SalaryTableProps {
   monthFilter: string;
   setMonthFilter: (value: string) => void;
-  employeeFilter: string;
-  setEmployeeFilter: (value: string) => void;
   statusFilter: SalaryStatus | "all";
   setStatusFilter: (value: SalaryStatus | "all") => void;
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
   canEdit: boolean;
   records: SalaryRecordWithEmployee[];
   isLoading: boolean;
-  employees: Employee[];
   openEdit: (rec: SalaryRecordWithEmployee) => void;
   openAdd: () => void;
 }
@@ -45,16 +41,14 @@ interface SalaryTableProps {
 const SalaryTable = ({
   monthFilter,
   setMonthFilter,
-  employeeFilter,
-  setEmployeeFilter,
   statusFilter,
   setStatusFilter,
+  searchQuery,
+  setSearchQuery,
   canEdit,
   records,
   isLoading,
-  employees,
   openEdit,
-  openAdd,
 }: SalaryTableProps) => {
   return (
     <>
@@ -62,26 +56,29 @@ const SalaryTable = ({
         <CardHeader>
           <CardTitle>Salary records</CardTitle>
           <CardDescription>
-            Filter by month, employee, and status.
+            Filter by month, employee, status, or search by name.
           </CardDescription>
-          <div className="flex flex-wrap gap-4 pt-2">
+          <div className="flex flex-wrap items-end gap-4 pt-2">
+            <div className="grid gap-1.5">
+              <Label className="text-muted-foreground text-sm">Search</Label>
+              <Input
+                placeholder="Employee name…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-[180px]"
+              />
+            </div>
             <SelectDropdown
               label="Month"
               options={[
                 { value: "all", label: "All months" },
-                ...MONTH_OPTIONS.map((o) => ({ value: o.value, label: o.label })),
+                ...MONTH_OPTIONS.map((o) => ({
+                  value: o.value,
+                  label: o.label,
+                })),
               ]}
               value={monthFilter || "all"}
               onChange={(v) => setMonthFilter(v === "all" ? "" : v)}
-            />
-            <SelectDropdown
-              label="Employee"
-              options={[
-                { value: "all", label: "All employees" },
-                ...employees.map((e) => ({ value: e.id, label: e.full_name })),
-              ]}
-              value={employeeFilter || "all"}
-              onChange={setEmployeeFilter}
             />
             <SelectDropdown
               label="Status"
@@ -181,16 +178,20 @@ const SalaryTable = ({
               data={records ?? []}
               getRowKey={(rec) => rec.id}
               emptyMessage="No salary records found. Add one or adjust filters."
-              renderActions={canEdit ? (rec) => (
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => openEdit(rec)}
-                  title="Edit"
-                >
-                  <Pencil className="size-4" />
-                </Button>
-              ) : undefined}
+              renderActions={
+                canEdit
+                  ? (rec) => (
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => openEdit(rec)}
+                        title="Edit"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    )
+                  : undefined
+              }
               showActions={canEdit}
             />
           )}

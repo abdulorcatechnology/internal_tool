@@ -223,6 +223,7 @@ export default function AddSalaryForm({
           <Input
             id="payment_date"
             type="date"
+            max={new Date().toISOString().slice(0, 10)}
             value={form.payment_date ?? ""}
             onChange={(e) =>
               setForm((p) => ({

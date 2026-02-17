@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSalaryRecords } from "@/lib/api/salary";
-import { useEmployees } from "@/lib/api/employees";
 import { useProfile } from "@/lib/api/profile";
 import type { SalaryRecordWithEmployee, SalaryStatus } from "@/types/salary";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import AddSalaryForm from "@/components/salary/AddSalaryForm";
 import SalaryTable from "@/components/salary/SalaryTable";
 import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
@@ -20,25 +18,29 @@ type SalaryTab = "records" | "analysis";
 export default function SalaryPage() {
   const [activeTab, setActiveTab] = useState<SalaryTab>("records");
   const [monthFilter, setMonthFilter] = useState<string>("");
-  const [employeeFilter, setEmployeeFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<SalaryStatus | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRecord, setEditingRecord] =
     useState<SalaryRecordWithEmployee | null>(null);
 
   const filters = useMemo(() => {
-    const f: { month?: string; employee_id?: string; status?: SalaryStatus } =
-      {};
+    const f: { month?: string; status?: SalaryStatus } = {};
     if (monthFilter) f.month = monthFilter;
-    if (employeeFilter && employeeFilter !== "all")
-      f.employee_id = employeeFilter;
     if (statusFilter !== "all") f.status = statusFilter;
     return f;
-  }, [monthFilter, employeeFilter, statusFilter]);
+  }, [monthFilter, statusFilter]);
 
   const { data: records = [], isLoading } = useSalaryRecords(filters);
-  const { data: employees = [] } = useEmployees({ status: "active" });
+  const filteredRecords = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return records;
+    return records.filter((r) =>
+      r.employees?.full_name?.toLowerCase().includes(q),
+    );
+  }, [records, searchQuery]);
   const { data: profile } = useProfile();
+
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
   function openAdd() {
@@ -80,14 +82,13 @@ export default function SalaryPage() {
           <SalaryTable
             monthFilter={monthFilter}
             setMonthFilter={setMonthFilter}
-            employeeFilter={employeeFilter}
-            setEmployeeFilter={setEmployeeFilter}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
             canEdit={canEdit}
-            records={records}
+            records={filteredRecords}
             isLoading={isLoading}
-            employees={employees}
             openEdit={openEdit}
             openAdd={openAdd}
           />

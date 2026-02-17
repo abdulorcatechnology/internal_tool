@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, UserX } from "lucide-react";
+import { Plus, Pencil, UserX, UserCheck } from "lucide-react";
 import {
   useEmployees,
-  useDepartments,
   useDeactivateEmployee,
+  useActivateEmployee,
 } from "@/lib/api/employees";
+import { useDepartments } from "@/lib/api/department";
 import type { Employee, EmployeeStatus } from "@/types/employees";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,13 +22,13 @@ import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
-import dateHelper from "@/lib/helper/date";
+import monthHelper from "@/lib/helper/month";
 import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
 import { STATUS_OPTIONS } from "@/lib/options/employees";
 
-const formatDate = dateHelper.formatDate;
+const formatDate = monthHelper.formatDate;
 const formatCurrency = currencyHelper.formatCurrency;
 
 export default function EmployeesPage() {
@@ -39,9 +40,9 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
   const filters = useMemo(() => {
-    const f: { status?: EmployeeStatus; department?: string } = {};
+    const f: { status?: EmployeeStatus; department_id?: string } = {};
     if (statusFilter !== "all") f.status = statusFilter;
-    if (departmentFilter !== "all") f.department = departmentFilter;
+    if (departmentFilter !== "all") f.department_id = departmentFilter;
     return f;
   }, [statusFilter, departmentFilter]);
 
@@ -49,7 +50,7 @@ export default function EmployeesPage() {
   const { data: departments = [] } = useDepartments();
   const { data: profile } = useProfile();
   const deactivateMutation = useDeactivateEmployee();
-
+  const activateMutation = useActivateEmployee();
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
   function openAdd() {
@@ -71,6 +72,18 @@ export default function EmployeesPage() {
       return;
     try {
       await deactivateMutation.mutateAsync(emp.id);
+    } catch (_) {}
+  }
+
+  async function handleActivate(emp: Employee) {
+    if (
+      !confirm(
+        `Set ${emp.full_name} as Active? They will receive new salary records.`,
+      )
+    )
+      return;
+    try {
+      await activateMutation.mutateAsync(emp.id);
     } catch (_) {}
   }
 
@@ -106,7 +119,7 @@ export default function EmployeesPage() {
               label="Department"
               options={[
                 { value: "all", label: "All departments" },
-                ...departments.map((d) => ({ value: d, label: d })),
+                ...departments.map((d) => ({ value: d.id, label: d.name })),
               ]}
               value={departmentFilter}
               onChange={setDepartmentFilter}
@@ -135,7 +148,7 @@ export default function EmployeesPage() {
                 {
                   id: "department",
                   header: "Department",
-                  cell: (emp) => emp.department || "—",
+                  cell: (emp) => emp.departments?.name ?? "—",
                 },
                 { id: "email", header: "Email", cell: (emp) => emp.email },
                 {
@@ -185,6 +198,17 @@ export default function EmployeesPage() {
                             className="text-destructive hover:text-destructive"
                           >
                             <UserX className="size-4" />
+                          </Button>
+                        )}
+                        {emp.status === "inactive" && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleActivate(emp)}
+                            title="Set Active"
+                            className="text-green-500 hover:text-green-500"
+                          >
+                            <UserCheck className="size-4" />
                           </Button>
                         )}
                       </div>

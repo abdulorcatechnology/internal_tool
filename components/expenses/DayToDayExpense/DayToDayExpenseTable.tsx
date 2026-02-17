@@ -23,11 +23,11 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import currencyHelper from "@/lib/helper/currency";
-import dateHelper from "@/lib/helper/date";
+import monthHelper from "@/lib/helper/month";
 import expensesOptions from "@/lib/options/expenses";
 
 const formatCurrency = currencyHelper.formatCurrency;
-const formatDate = dateHelper.formatDate;
+const formatDate = monthHelper.formatDate;
 
 interface DayToDayExpenseTableProps {
   canEdit: boolean;

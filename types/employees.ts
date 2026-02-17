@@ -4,7 +4,8 @@ export type Employee = {
   id: string;
   full_name: string;
   employee_id: string | null;
-  department: string;
+  department_id: string | null;
+  departments?: { id: string; name: string } | null;
   role: string | null;
   email: string;
   monthly_salary: number;
@@ -18,7 +19,7 @@ export type Employee = {
 export type CreateEmployeeInput = {
   full_name: string;
   employee_id?: string | null;
-  department: string;
+  department_id?: string | null;
   role?: string | null;
   email: string;
   monthly_salary: number;
@@ -30,6 +31,6 @@ export type CreateEmployeeInput = {
 export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
 
 export type EmployeesFilters = {
-  department?: string;
+  department_id?: string | null;
   status?: EmployeeStatus;
 };
