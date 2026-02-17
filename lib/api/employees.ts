@@ -15,7 +15,7 @@ function supabase() {
 }
 
 export async function fetchEmployees(
-  filters?: EmployeesFilters
+  filters?: EmployeesFilters,
 ): Promise<Employee[]> {
   let q = supabase()
     .from("employees")
@@ -53,7 +53,7 @@ function monthFromDate(ymd: string): string {
 }
 
 export async function createEmployee(
-  input: CreateEmployeeInput
+  input: CreateEmployeeInput,
 ): Promise<Employee> {
   const { data, error } = await supabase()
     .from("employees")
@@ -92,17 +92,22 @@ export async function createEmployee(
 
 export async function updateEmployee(
   id: string,
-  input: UpdateEmployeeInput
+  input: UpdateEmployeeInput,
 ): Promise<Employee> {
-  const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const payload: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
   if (input.full_name !== undefined) payload.full_name = input.full_name;
-  if (input.employee_id !== undefined) payload.employee_id = input.employee_id?.trim() || null;
-  if (input.department_id !== undefined) payload.department_id = input.department_id;
+  if (input.employee_id !== undefined)
+    payload.employee_id = input.employee_id?.trim() || null;
+  if (input.department_id !== undefined)
+    payload.department_id = input.department_id;
   if (input.role !== undefined) payload.role = input.role;
   if (input.email !== undefined) payload.email = input.email;
   if (input.monthly_salary !== undefined)
     payload.monthly_salary = Number(input.monthly_salary);
-  if (input.joining_date !== undefined) payload.joining_date = input.joining_date;
+  if (input.joining_date !== undefined)
+    payload.joining_date = input.joining_date;
   if (input.payment_method_notes !== undefined)
     payload.payment_method_notes = input.payment_method_notes;
   if (input.status !== undefined) payload.status = input.status;
@@ -122,6 +127,10 @@ export async function deactivateEmployee(id: string): Promise<Employee> {
   return updateEmployee(id, { status: "inactive" });
 }
 
+export async function activateEmployee(id: string): Promise<Employee> {
+  return updateEmployee(id, { status: "active" });
+}
+
 export function useEmployees(filters?: EmployeesFilters) {
   return useQuery({
     queryKey: [...QUERY_KEY, filters] as const,
@@ -129,7 +138,10 @@ export function useEmployees(filters?: EmployeesFilters) {
   });
 }
 
-export function useEmployee(id: string | null, options?: { enabled?: boolean }) {
+export function useEmployee(
+  id: string | null,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: [...QUERY_KEY, "detail", id] as const,
     queryFn: () => (id ? fetchEmployeeById(id) : Promise.resolve(null)),
@@ -164,6 +176,16 @@ export function useDeactivateEmployee() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: deactivateEmployee,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+}
+
+export function useActivateEmployee() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: activateEmployee,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QUERY_KEY });
     },

@@ -1,8 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, UserX } from "lucide-react";
-import { useEmployees, useDeactivateEmployee } from "@/lib/api/employees";
+import { Plus, Pencil, UserX, UserCheck } from "lucide-react";
+import {
+  useEmployees,
+  useDeactivateEmployee,
+  useActivateEmployee,
+} from "@/lib/api/employees";
 import { useDepartments } from "@/lib/api/department";
 import type { Employee, EmployeeStatus } from "@/types/employees";
 import { Button } from "@/components/ui/button";
@@ -46,7 +50,7 @@ export default function EmployeesPage() {
   const { data: departments = [] } = useDepartments();
   const { data: profile } = useProfile();
   const deactivateMutation = useDeactivateEmployee();
-
+  const activateMutation = useActivateEmployee();
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
   function openAdd() {
@@ -68,6 +72,18 @@ export default function EmployeesPage() {
       return;
     try {
       await deactivateMutation.mutateAsync(emp.id);
+    } catch (_) {}
+  }
+
+  async function handleActivate(emp: Employee) {
+    if (
+      !confirm(
+        `Set ${emp.full_name} as Active? They will receive new salary records.`,
+      )
+    )
+      return;
+    try {
+      await activateMutation.mutateAsync(emp.id);
     } catch (_) {}
   }
 
@@ -182,6 +198,17 @@ export default function EmployeesPage() {
                             className="text-destructive hover:text-destructive"
                           >
                             <UserX className="size-4" />
+                          </Button>
+                        )}
+                        {emp.status === "inactive" && (
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => handleActivate(emp)}
+                            title="Set Active"
+                            className="text-green-500 hover:text-green-500"
+                          >
+                            <UserCheck className="size-4" />
                           </Button>
                         )}
                       </div>
