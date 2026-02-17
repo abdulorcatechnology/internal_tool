@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Company Payroll & Expense Manager",
+  title: "Accruva",
   description: "Internal payroll and expense dashboard",
 };
 
