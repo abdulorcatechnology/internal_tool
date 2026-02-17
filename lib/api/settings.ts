@@ -28,7 +28,7 @@ export async function fetchPredefinedDepartments(): Promise<string[]> {
 }
 
 export async function updatePredefinedDepartments(
-  departments: string[]
+  departments: string[],
 ): Promise<void> {
   const trimmed = departments.map((d) => d.trim()).filter(Boolean);
   const { error } = await supabase()
@@ -39,7 +39,7 @@ export async function updatePredefinedDepartments(
         value: JSON.stringify(trimmed),
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "key" }
+      { onConflict: "key" },
     );
   if (error) throw error;
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { useProfile } from "@/lib/api/profile";
 import {
-  usePredefinedDepartments,
-  useUpdatePredefinedDepartments,
-} from "@/lib/api/settings";
+  useDepartments,
+  useCreateDepartment,
+  useDeleteDepartment,
+} from "@/lib/api/department";
 import Heading from "@/components/shared/Heading";
 import {
   Card,
@@ -21,43 +22,34 @@ import { Label } from "@/components/ui/label";
 
 export default function SettingsPage() {
   const { data: profile } = useProfile();
-  const { data: departments = [], isLoading } = usePredefinedDepartments();
-  const updateMutation = useUpdatePredefinedDepartments();
-  const [localList, setLocalList] = useState<string[]>([]);
+  const { data: departments = [], isLoading } = useDepartments();
+  const createMutation = useCreateDepartment();
+  const deleteMutation = useDeleteDepartment();
   const [newDept, setNewDept] = useState("");
 
   const isAdmin = profile?.role === "admin";
 
-  useEffect(() => {
-    setLocalList(departments);
-  }, [departments]);
-
   function handleAdd() {
     const trimmed = newDept.trim();
-    if (!trimmed || localList.includes(trimmed)) return;
-    setLocalList((prev) => [...prev, trimmed].sort());
-    setNewDept("");
+    if (!trimmed) return;
+    createMutation.mutate(
+      { name: trimmed },
+      {
+        onSuccess: () => setNewDept(""),
+      }
+    );
   }
 
-  function handleRemove(name: string) {
-    setLocalList((prev) => prev.filter((d) => d !== name));
+  function handleRemove(id: string) {
+    if (!confirm("Remove this department? Employees using it will have no department.")) return;
+    deleteMutation.mutate(id);
   }
-
-  async function handleSave() {
-    try {
-      await updateMutation.mutateAsync(localList);
-    } catch (_) {}
-  }
-
-  const hasChanges =
-    localList.length !== departments.length ||
-    localList.some((d, i) => departments[i] !== d);
 
   return (
     <div className="space-y-6">
       <Heading
         title="Settings"
-        description="Manage predefined departments and other options."
+        description="Manage departments and other options."
       />
       <Card>
         <CardHeader>
@@ -87,52 +79,56 @@ export default function SettingsPage() {
                     placeholder="e.g. Engineering"
                     value={newDept}
                     onChange={(e) => setNewDept(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAdd())}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), handleAdd())
+                    }
                   />
                 </div>
-                <Button type="button" variant="secondary" onClick={handleAdd}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleAdd}
+                  disabled={!newDept.trim() || createMutation.isPending}
+                >
                   <Plus className="size-4" />
                   Add
                 </Button>
               </div>
-              {localList.length > 0 && (
+              {createMutation.isError && (
+                <p className="text-sm text-destructive" role="alert">
+                  {createMutation.error?.message}
+                </p>
+              )}
+              {departments.length > 0 ? (
                 <ul className="space-y-2">
-                  {localList.map((name) => (
+                  {departments.map((d) => (
                     <li
-                      key={name}
+                      key={d.id}
                       className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-sm"
                     >
-                      <span>{name}</span>
+                      <span>{d.name}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => handleRemove(name)}
+                        onClick={() => handleRemove(d.id)}
                         title="Remove"
                         className="text-destructive hover:text-destructive"
+                        disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="size-4" />
                       </Button>
                     </li>
                   ))}
                 </ul>
-              )}
-              {localList.length === 0 && (
+              ) : (
                 <p className="text-sm text-muted-foreground">
                   No departments yet. Add one above.
                 </p>
               )}
-              {hasChanges && (
-                <Button
-                  onClick={handleSave}
-                  disabled={updateMutation.isPending}
-                >
-                  {updateMutation.isPending ? "Saving…" : "Save departments"}
-                </Button>
-              )}
-              {updateMutation.isError && (
+              {deleteMutation.isError && (
                 <p className="text-sm text-destructive" role="alert">
-                  {updateMutation.error?.message}
+                  {deleteMutation.error?.message}
                 </p>
               )}
             </>
