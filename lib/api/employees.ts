@@ -67,6 +67,10 @@ export async function createEmployee(
       joining_date: input.joining_date,
       payment_method_notes: input.payment_method_notes ?? null,
       status: input.status ?? "active",
+      country: input.country ?? "",
+      city: input.city ?? "",
+      currency: input.currency ?? "",
+      phone: input.phone ?? null,
     })
     .select()
     .single();
@@ -111,6 +115,10 @@ export async function updateEmployee(
   if (input.payment_method_notes !== undefined)
     payload.payment_method_notes = input.payment_method_notes;
   if (input.status !== undefined) payload.status = input.status;
+  if (input.country !== undefined) payload.country = input.country;
+  if (input.city !== undefined) payload.city = input.city;
+  if (input.currency !== undefined) payload.currency = input.currency;
+  if (input.phone !== undefined) payload.phone = input.phone;
 
   const { data, error } = await supabase()
     .from("employees")

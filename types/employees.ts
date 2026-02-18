@@ -14,6 +14,10 @@ export type Employee = {
   status: EmployeeStatus;
   created_at: string;
   updated_at: string;
+  country: string;
+  city: string;
+  currency: string;
+  phone?: string | null;
 };
 
 export type CreateEmployeeInput = {
@@ -26,6 +30,10 @@ export type CreateEmployeeInput = {
   joining_date: string;
   payment_method_notes?: string | null;
   status?: EmployeeStatus;
+  country: string;
+  city: string;
+  currency: string;
+  phone?: string | null;
 };
 
 export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
@@ -33,4 +41,7 @@ export type UpdateEmployeeInput = Partial<CreateEmployeeInput>;
 export type EmployeesFilters = {
   department_id?: string | null;
   status?: EmployeeStatus;
+  country?: string | null;
+  city?: string | null;
+  currency?: string | null;
 };
