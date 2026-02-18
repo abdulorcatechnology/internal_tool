@@ -5,6 +5,6 @@ export const STATUS_OPTIONS: {
   label: string;
 }[] = [
   { value: "all", label: "All statuses" },
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
+  { value: "active", label: "Working" },
+  { value: "inactive", label: "Not working" },
 ];

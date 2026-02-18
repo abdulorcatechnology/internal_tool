@@ -169,7 +169,7 @@ export default function EmployeesPage() {
                     <StatusBadge
                       variant={emp.status === "active" ? "success" : "muted"}
                     >
-                      {emp.status}
+                      {emp.status == "active" ? "Working" : "Not working"}
                     </StatusBadge>
                   ),
                 },
