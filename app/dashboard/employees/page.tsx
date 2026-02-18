@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, UserX, UserCheck } from "lucide-react";
+import { Plus, Pencil, UserX, UserCheck, Eye } from "lucide-react";
 import {
   useEmployees,
   useDeactivateEmployee,
@@ -17,7 +17,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
@@ -27,6 +33,7 @@ import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
 import { STATUS_OPTIONS } from "@/lib/options/employees";
+import EmployeeInfo from "@/components/employees/EmployeeInfo";
 
 const formatDate = monthHelper.formatDate;
 const formatCurrency = currencyHelper.formatCurrency;
@@ -38,6 +45,8 @@ export default function EmployeesPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
 
   const filters = useMemo(() => {
     const f: { status?: EmployeeStatus; department_id?: string } = {};
@@ -61,6 +70,11 @@ export default function EmployeesPage() {
   function openEdit(emp: Employee) {
     setEditingEmployee(emp);
     setSheetOpen(true);
+  }
+
+  function openView(emp: Employee) {
+    setViewingEmployee(emp);
+    setViewOpen(true);
   }
 
   async function handleDeactivate(emp: Employee) {
@@ -133,6 +147,7 @@ export default function EmployeesPage() {
             </p>
           ) : (
             <DataTable<Employee>
+              // onClick={(emp) => openView(emp)}
               columns={[
                 {
                   id: "name",
@@ -184,6 +199,14 @@ export default function EmployeesPage() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
+                          onClick={() => openView(emp)}
+                          title="View"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => openEdit(emp)}
                           title="Edit"
                         >
@@ -229,6 +252,21 @@ export default function EmployeesPage() {
             onSuccess={() => setSheetOpen(false)}
             onCancel={() => setSheetOpen(false)}
           />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={viewOpen} onOpenChange={setViewOpen}>
+        <SheetContent
+          className="overflow-y-auto flex w-full flex-col sm:max-w-md"
+          side="right"
+        >
+          <SheetHeader>
+            <SheetTitle>Employee Information</SheetTitle>
+            <SheetDescription>
+              Full details for the selected employee.
+            </SheetDescription>
+          </SheetHeader>
+          <EmployeeInfo employee={viewingEmployee} />
         </SheetContent>
       </Sheet>
     </div>

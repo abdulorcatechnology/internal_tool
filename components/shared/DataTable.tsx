@@ -29,6 +29,7 @@ export interface DataTableProps<T> {
   /** Only show actions column when this is true and renderActions is provided. */
   showActions?: boolean;
   actionsHeaderClassName?: string;
+  onClick?: (row: T) => void;
 }
 
 export default function DataTable<T>({
@@ -40,6 +41,7 @@ export default function DataTable<T>({
   renderActions,
   showActions = true,
   actionsHeaderClassName = "w-[80px]",
+  onClick,
 }: DataTableProps<T>) {
   const hasActions = Boolean(renderActions && showActions);
   const span = emptyColSpan ?? columns.length + (hasActions ? 1 : 0);
@@ -90,9 +92,7 @@ export default function DataTable<T>({
                   {col.cell(row)}
                 </TableCell>
               ))}
-              {hasActions && (
-                <TableCell>{renderActions!(row)}</TableCell>
-              )}
+              {hasActions && <TableCell>{renderActions!(row)}</TableCell>}
             </TableRow>
           ))
         )}
