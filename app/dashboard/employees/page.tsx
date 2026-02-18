@@ -29,14 +29,12 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import monthHelper from "@/lib/helper/month";
-import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
 import { STATUS_OPTIONS } from "@/lib/options/employees";
 import EmployeeInfo from "@/components/employees/EmployeeInfo";
 
 const formatDate = monthHelper.formatDate;
-const formatCurrency = currencyHelper.formatCurrency;
 
 export default function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | "all">(

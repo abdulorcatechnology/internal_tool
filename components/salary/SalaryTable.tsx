@@ -114,26 +114,27 @@ const SalaryTable = ({
                   id: "base",
                   header: "Base",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.base_salary),
+                  cell: (rec) =>
+                    `${rec.employees?.currency} ${rec.employees?.monthly_salary}`,
                 },
                 {
                   id: "ded",
                   header: "Ded.",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.deductions),
+                  cell: (rec) => `${rec.employees?.currency} ${rec.deductions}`,
                 },
                 {
                   id: "bonus",
                   header: "Bonus",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.bonus),
+                  cell: (rec) => `${rec.employees?.currency} ${rec.bonus}`,
                 },
                 {
                   id: "net",
                   header: "Net",
                   align: "right",
                   className: "font-medium",
-                  cell: (rec) => formatCurrency(rec.net_salary),
+                  cell: (rec) => `${rec.employees?.currency} ${rec.net_salary}`,
                 },
                 {
                   id: "status",

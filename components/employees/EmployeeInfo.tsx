@@ -80,7 +80,7 @@ export default function EmployeeInfo({ employee }: EmployeeInfoProps) {
           label="Monthly salary"
           value={
             employee.currency
-              ? `${employee.currency} ${formatCurrency(employee.monthly_salary)}`
+              ? `${employee.currency} ${employee.monthly_salary}`
               : formatCurrency(employee.monthly_salary)
           }
         />
