@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ManageDepartment from "@/components/settings/ManageDepartments";
+import ManageCurrencies from "@/components/settings/ManageCurrencies";
 
 export default function SettingsPage() {
   return (
@@ -29,6 +30,7 @@ export default function SettingsPage() {
         description="Manage departments and other options."
       />
       <ManageDepartment />
+      <ManageCurrencies />
     </div>
   );
 }
