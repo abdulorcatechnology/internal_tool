@@ -3,6 +3,8 @@ export type AssetStatus = "active" | "retired";
 
 export type FixedAsset = {
   id: string;
+  currency_id: string;
+  currencies?: { id: string; code: string } | null;
   asset_name: string;
   asset_type: AssetType;
   purchase_date: string;
@@ -23,6 +25,7 @@ export type CreateFixedAssetInput = {
   asset_type: AssetType;
   purchase_date: string;
   cost: number;
+  currency_id: string;
   assigned_employee_id?: string | null;
   depreciation_rate?: number | null;
   status?: AssetStatus;
@@ -51,6 +54,8 @@ export type ExpensePaymentStatus = "pending" | "paid";
 
 export type DayToDayExpense = {
   id: string;
+  currency_id: string;
+  currencies?: { id: string; code: string } | null;
   category: ExpenseCategory;
   vendor: string;
   date: string;
@@ -67,6 +72,7 @@ export type CreateDayToDayExpenseInput = {
   vendor: string;
   date: string;
   amount: number;
+  currency_id: string;
   payment_status?: ExpensePaymentStatus;
   receipt_url?: string | null;
   notes?: string | null;

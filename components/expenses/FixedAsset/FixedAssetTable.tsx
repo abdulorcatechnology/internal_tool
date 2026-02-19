@@ -152,7 +152,10 @@ const FixedAssetTable = ({
                   id: "cost",
                   header: "Cost",
                   align: "right",
-                  cell: (a) => formatCurrency(a.cost),
+                  cell: (a) =>
+                    a.currencies?.code
+                      ? `${a.currencies?.code} ${a.cost}`
+                      : formatCurrency(a.cost),
                 },
                 {
                   id: "assigned",

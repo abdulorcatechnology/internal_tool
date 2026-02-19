@@ -151,7 +151,10 @@ const DayToDayExpenseTable = ({
                   id: "amount",
                   header: "Amount",
                   align: "right",
-                  cell: (e) => formatCurrency(e.amount),
+                  cell: (e) =>
+                    e.currencies?.code
+                      ? `${e.currencies?.code} ${e.amount}`
+                      : formatCurrency(e.amount),
                 },
                 {
                   id: "payment",

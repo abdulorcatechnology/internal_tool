@@ -26,6 +26,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import expensesOptions from "@/lib/options/expenses";
+import { useCurrencies } from "@/lib/api/currency";
 
 // ----- Fixed asset form -----
 export default function FixedAssetForm({
@@ -37,6 +38,9 @@ export default function FixedAssetForm({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
+  const { data: currencies = [] } = useCurrencies();
+  const firstCurrencyId = currencies[0]?.id ?? "";
+
   const [form, setForm] = useState<CreateFixedAssetInput>({
     asset_name: asset?.asset_name ?? "",
     asset_type: asset?.asset_type ?? "laptop",
@@ -46,6 +50,7 @@ export default function FixedAssetForm({
     assigned_employee_id: asset?.assigned_employee_id ?? null,
     depreciation_rate: asset?.depreciation_rate ?? null,
     status: asset?.status ?? "active",
+    currency_id: asset?.currency_id ?? asset?.currencies?.id ?? firstCurrencyId,
   });
 
   useEffect(() => {
@@ -58,6 +63,7 @@ export default function FixedAssetForm({
         assigned_employee_id: asset.assigned_employee_id ?? null,
         depreciation_rate: asset.depreciation_rate ?? null,
         status: asset.status,
+        currency_id: asset.currency_id ?? asset.currencies?.id ?? firstCurrencyId,
       });
     } else {
       setForm({
@@ -68,9 +74,10 @@ export default function FixedAssetForm({
         assigned_employee_id: null,
         depreciation_rate: null,
         status: "active",
+        currency_id: firstCurrencyId,
       });
     }
-  }, [asset]);
+  }, [asset, firstCurrencyId]);
 
   const createM = useCreateFixedAsset();
   const updateM = useUpdateFixedAsset();
@@ -155,6 +162,27 @@ export default function FixedAssetForm({
           />
         </div>
         <div className="grid gap-2">
+          <Label>Currency *</Label>
+          <Select
+            value={form.currency_id || undefined}
+            onValueChange={(v: string) =>
+              setForm((p) => ({ ...p, currency_id: v }))
+            }
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map((o) => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
           <Label>Assigned employee</Label>
           <Select
             value={form.assigned_employee_id ?? "none"}
@@ -221,7 +249,7 @@ export default function FixedAssetForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending || !form.currency_id}>
           {mutation.isPending ? "Saving…" : isEdit ? "Update" : "Add asset"}
         </Button>
       </SheetFooter>

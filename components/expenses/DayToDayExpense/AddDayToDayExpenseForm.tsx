@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import expensesOptions from "@/lib/options/expenses";
+import { useCurrencies } from "@/lib/api/currency";
 
 // ----- Day-to-day form -----
 export default function DayToDayForm({
@@ -39,6 +40,9 @@ export default function DayToDayForm({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
+  const { data: currencies = [] } = useCurrencies();
+  const firstCurrencyId = currencies[0]?.id ?? "";
+
   const [form, setForm] = useState<CreateDayToDayExpenseInput>({
     category: expense?.category ?? "other",
     vendor: expense?.vendor ?? "",
@@ -47,6 +51,7 @@ export default function DayToDayForm({
     payment_status: expense?.payment_status ?? "pending",
     receipt_url: expense?.receipt_url ?? null,
     notes: expense?.notes ?? null,
+    currency_id: expense?.currency_id ?? expense?.currencies?.id ?? firstCurrencyId,
   });
 
   useEffect(() => {
@@ -59,6 +64,7 @@ export default function DayToDayForm({
         payment_status: expense.payment_status,
         receipt_url: expense.receipt_url ?? null,
         notes: expense.notes ?? null,
+        currency_id: expense.currency_id ?? expense.currencies?.id ?? firstCurrencyId,
       });
     } else {
       setForm({
@@ -69,9 +75,10 @@ export default function DayToDayForm({
         payment_status: "pending",
         receipt_url: null,
         notes: null,
+        currency_id: firstCurrencyId,
       });
     }
-  }, [expense]);
+  }, [expense, firstCurrencyId]);
 
   const createM = useCreateDayToDayExpense();
   const updateM = useUpdateDayToDayExpense();
@@ -153,6 +160,27 @@ export default function DayToDayForm({
           />
         </div>
         <div className="grid gap-2">
+          <Label>Currency *</Label>
+          <Select
+            value={form.currency_id || undefined}
+            onValueChange={(v: string) =>
+              setForm((p) => ({ ...p, currency_id: v }))
+            }
+            required
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map((o) => (
+                <SelectItem key={o.id} value={o.id}>
+                  {o.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
           <Label>Payment status</Label>
           <Select
             value={form.payment_status}
@@ -197,7 +225,7 @@ export default function DayToDayForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending || !form.currency_id}>
           {mutation.isPending ? "Saving…" : isEdit ? "Update" : "Add expense"}
         </Button>
       </SheetFooter>

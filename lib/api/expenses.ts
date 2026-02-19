@@ -27,7 +27,7 @@ export async function fetchFixedAssets(
 ): Promise<FixedAssetWithEmployee[]> {
   let q = supabase()
     .from("fixed_assets")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id), currencies(id, code)")
     .order("purchase_date", { ascending: false });
 
   if (filters?.asset_type) q = q.eq("asset_type", filters.asset_type);
@@ -48,6 +48,7 @@ export async function createFixedAsset(
       asset_type: input.asset_type,
       purchase_date: input.purchase_date,
       cost: Number(input.cost),
+      currency_id: input.currency_id,
       assigned_employee_id: input.assigned_employee_id ?? null,
       depreciation_rate: input.depreciation_rate ?? null,
       status: input.status ?? "active",
@@ -75,6 +76,7 @@ export async function updateFixedAsset(
   if (input.depreciation_rate !== undefined)
     payload.depreciation_rate = input.depreciation_rate ?? null;
   if (input.status !== undefined) payload.status = input.status;
+  if (input.currency_id !== undefined) payload.currency_id = input.currency_id;
 
   const { data, error } = await supabase()
     .from("fixed_assets")
@@ -130,7 +132,7 @@ export async function fetchDayToDayExpenses(
 ): Promise<DayToDayExpense[]> {
   let q = supabase()
     .from("day_to_day_expenses")
-    .select("*")
+    .select("*, currencies(id,code)")
     .order("date", { ascending: false });
 
   if (filters?.category) q = q.eq("category", filters.category);
@@ -156,6 +158,7 @@ export async function createDayToDayExpense(
       vendor: input.vendor,
       date: input.date,
       amount: Number(input.amount),
+      currency_id: input.currency_id,
       payment_status: input.payment_status ?? "pending",
       receipt_url: input.receipt_url ?? null,
       notes: input.notes ?? null,
@@ -177,6 +180,7 @@ export async function updateDayToDayExpense(
   if (input.vendor !== undefined) payload.vendor = input.vendor;
   if (input.date !== undefined) payload.date = input.date;
   if (input.amount !== undefined) payload.amount = Number(input.amount);
+  if (input.currency_id !== undefined) payload.currency_id = input.currency_id;
   if (input.payment_status !== undefined)
     payload.payment_status = input.payment_status;
   if (input.receipt_url !== undefined)
