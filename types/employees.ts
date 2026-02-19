@@ -16,7 +16,8 @@ export type Employee = {
   updated_at: string;
   country: string;
   city: string;
-  currency: string;
+  currency_id: string | null;
+  currencies?: { id: string; code: string } | null;
   phone?: string | null;
 };
 

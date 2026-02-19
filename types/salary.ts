@@ -20,8 +20,8 @@ export type SalaryRecordWithEmployee = SalaryRecord & {
   employees?: {
     full_name: string;
     employee_id: string | null;
-    currency: string;
     monthly_salary: number;
+    currencies?: { id: string; code: string; name: string | null } | null;
   } | null;
 };
 

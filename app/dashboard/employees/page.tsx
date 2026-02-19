@@ -168,7 +168,8 @@ export default function EmployeesPage() {
                   id: "salary",
                   header: "Salary",
                   align: "right",
-                  cell: (emp) => `${emp.currency} ${emp.monthly_salary}`,
+                  cell: (emp) =>
+                    `${emp.currencies?.code} ${emp.monthly_salary}`,
                 },
                 {
                   id: "joining",

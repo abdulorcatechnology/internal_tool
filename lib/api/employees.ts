@@ -19,7 +19,7 @@ export async function fetchEmployees(
 ): Promise<Employee[]> {
   let q = supabase()
     .from("employees")
-    .select("*, departments(id, name)")
+    .select("*, departments(id, name), currencies(id, code)")
     .order("created_at", { ascending: false });
 
   if (filters?.department_id) {

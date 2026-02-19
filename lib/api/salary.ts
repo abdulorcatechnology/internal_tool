@@ -24,7 +24,7 @@ export async function fetchSalaryRecords(
 ): Promise<SalaryRecordWithEmployee[]> {
   let q = supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id, currency, monthly_salary)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .order("month", { ascending: false });
 
   if (filters?.month) {
@@ -54,7 +54,7 @@ export async function fetchSalaryRecordById(
 ): Promise<SalaryRecordWithEmployee | null> {
   const { data, error } = await supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .eq("id", id)
     .single();
   if (error) {
@@ -142,7 +142,7 @@ export async function fetchSalaryRecordsForYear(
   const end = `${y}-12-31`;
   const { data, error } = await supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .gte("month", start)
     .lte("month", end)
     .order("month", { ascending: true });
