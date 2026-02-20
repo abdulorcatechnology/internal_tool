@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Payroll by month</CardTitle>
+          <CardTitle className="text-xl">Payroll by month</CardTitle>
           <CardDescription>Last 12 months total payroll.</CardDescription>
         </CardHeader>
         <CardContent>
@@ -139,7 +139,7 @@ export default function DashboardPage() {
       {/* Expense vs Payroll comparison */}
       <Card>
         <CardHeader>
-          <CardTitle>Expense vs Payroll</CardTitle>
+          <CardTitle className="text-xl">Expense vs Payroll</CardTitle>
           <CardDescription>
             Compare monthly payroll and office expenses side by side.
           </CardDescription>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
       {/* Yearly trend – Payroll */}
       <Card>
         <CardHeader>
-          <CardTitle>Yearly trend – Payroll</CardTitle>
+          <CardTitle className="text-xl">Yearly trend – Payroll</CardTitle>
           <CardDescription>
             Total payroll by month over the last 12 months.
           </CardDescription>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
       {/* Yearly trend – Expenses */}
       <Card>
         <CardHeader>
-          <CardTitle>Yearly trend – Expenses</CardTitle>
+          <CardTitle className="text-xl">Yearly trend – Expenses</CardTitle>
           <CardDescription>
             Office expenses by month over the last 12 months.
           </CardDescription>
