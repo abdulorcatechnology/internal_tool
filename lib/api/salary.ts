@@ -20,11 +20,11 @@ function monthToDate(ym: string): string {
 }
 
 export async function fetchSalaryRecords(
-  filters?: SalaryFilters
+  filters?: SalaryFilters,
 ): Promise<SalaryRecordWithEmployee[]> {
   let q = supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .order("month", { ascending: false });
 
   if (filters?.month) {
@@ -50,11 +50,11 @@ function nextMonth(ymd: string): string {
 }
 
 export async function fetchSalaryRecordById(
-  id: string
+  id: string,
 ): Promise<SalaryRecordWithEmployee | null> {
   const { data, error } = await supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .eq("id", id)
     .single();
   if (error) {
@@ -65,9 +65,10 @@ export async function fetchSalaryRecordById(
 }
 
 export async function createSalaryRecord(
-  input: CreateSalaryRecordInput
+  input: CreateSalaryRecordInput,
 ): Promise<SalaryRecord> {
-  const monthDate = input.month.length === 7 ? monthToDate(input.month) : input.month;
+  const monthDate =
+    input.month.length === 7 ? monthToDate(input.month) : input.month;
   const { data, error } = await supabase()
     .from("salary_records")
     .insert({
@@ -89,16 +90,19 @@ export async function createSalaryRecord(
 
 export async function updateSalaryRecord(
   id: string,
-  input: UpdateSalaryRecordInput
+  input: UpdateSalaryRecordInput,
 ): Promise<SalaryRecord> {
   const payload: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
-  if (input.base_salary !== undefined) payload.base_salary = Number(input.base_salary);
-  if (input.deductions !== undefined) payload.deductions = Number(input.deductions);
+  if (input.base_salary !== undefined)
+    payload.base_salary = Number(input.base_salary);
+  if (input.deductions !== undefined)
+    payload.deductions = Number(input.deductions);
   if (input.bonus !== undefined) payload.bonus = Number(input.bonus);
   if (input.status !== undefined) payload.status = input.status;
-  if (input.payment_date !== undefined) payload.payment_date = input.payment_date;
+  if (input.payment_date !== undefined)
+    payload.payment_date = input.payment_date;
   if (input.comments !== undefined) payload.comments = input.comments;
   if (input.receipt_url !== undefined) payload.receipt_url = input.receipt_url;
 
@@ -114,14 +118,16 @@ export async function updateSalaryRecord(
 
 export async function uploadReceipt(
   recordId: string,
-  file: File
+  file: File,
 ): Promise<string> {
   const sup = supabase();
   const ext = file.name.split(".").pop() ?? "bin";
   const path = `${recordId}/${Date.now()}.${ext}`;
-  const { error } = await sup.storage.from("salary-receipts").upload(path, file, {
-    upsert: true,
-  });
+  const { error } = await sup.storage
+    .from("salary-receipts")
+    .upload(path, file, {
+      upsert: true,
+    });
   if (error) throw error;
   const { data } = sup.storage.from("salary-receipts").getPublicUrl(path);
   return data.publicUrl;
@@ -129,14 +135,14 @@ export async function uploadReceipt(
 
 /** Fetch all salary records for a calendar year (for analysis) */
 export async function fetchSalaryRecordsForYear(
-  year?: number
+  year?: number,
 ): Promise<SalaryRecordWithEmployee[]> {
   const y = year ?? new Date().getFullYear();
   const start = `${y}-01-01`;
   const end = `${y}-12-31`;
   const { data, error } = await supabase()
     .from("salary_records")
-    .select("*, employees(full_name, employee_id)")
+    .select("*, employees(full_name, employee_id, monthly_salary, currencies(id, code, name))")
     .gte("month", start)
     .lte("month", end)
     .order("month", { ascending: true });
@@ -181,8 +187,13 @@ export function useCreateSalaryRecord() {
 export function useUpdateSalaryRecord() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: UpdateSalaryRecordInput }) =>
-      updateSalaryRecord(id, input),
+    mutationFn: ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateSalaryRecordInput;
+    }) => updateSalaryRecord(id, input),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: QUERY_KEY });
     },

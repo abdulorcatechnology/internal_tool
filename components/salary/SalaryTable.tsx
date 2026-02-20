@@ -18,6 +18,7 @@ import salaryOptions from "@/lib/options/salary";
 import SelectDropdown from "../shared/SelectDropdown";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { Currency } from "@/types/currencies";
 
 const MONTH_OPTIONS = monthHelper.getMonthOptions();
 const formatMonth = monthHelper.formatMonth;
@@ -36,6 +37,9 @@ interface SalaryTableProps {
   isLoading: boolean;
   openEdit: (rec: SalaryRecordWithEmployee) => void;
   openAdd: () => void;
+  currencyFilter: string;
+  setCurrencyFilter: (value: string) => void;
+  currencies: Currency[];
 }
 
 const SalaryTable = ({
@@ -49,6 +53,9 @@ const SalaryTable = ({
   records,
   isLoading,
   openEdit,
+  currencyFilter,
+  setCurrencyFilter,
+  currencies,
 }: SalaryTableProps) => {
   return (
     <>
@@ -88,6 +95,18 @@ const SalaryTable = ({
                 setStatusFilter(v === "all" ? "all" : (v as SalaryStatus))
               }
             />
+            <SelectDropdown
+              label="Currency"
+              options={[
+                { value: "all", label: "All currencies" },
+                ...currencies.map((c) => ({
+                  value: c.id,
+                  label: c.name ? `${c.code}` : c.code,
+                })),
+              ]}
+              value={currencyFilter || "all"}
+              onChange={(v) => setCurrencyFilter(v as string)}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -114,26 +133,30 @@ const SalaryTable = ({
                   id: "base",
                   header: "Base",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.base_salary),
+                  cell: (rec) =>
+                    `${rec.employees?.currencies?.code} ${rec.employees?.monthly_salary}`,
                 },
                 {
                   id: "ded",
                   header: "Ded.",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.deductions),
+                  cell: (rec) =>
+                    `${rec.employees?.currencies?.code} ${rec.deductions}`,
                 },
                 {
                   id: "bonus",
                   header: "Bonus",
                   align: "right",
-                  cell: (rec) => formatCurrency(rec.bonus),
+                  cell: (rec) =>
+                    `${rec.employees?.currencies?.code} ${rec.bonus}`,
                 },
                 {
                   id: "net",
                   header: "Net",
                   align: "right",
                   className: "font-medium",
-                  cell: (rec) => formatCurrency(rec.net_salary),
+                  cell: (rec) =>
+                    `${rec.employees?.currencies?.code} ${rec.net_salary}`,
                 },
                 {
                   id: "status",

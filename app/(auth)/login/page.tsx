@@ -49,7 +49,7 @@ function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Company Payroll & Expense</CardTitle>
+          <CardTitle>Accruva</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -113,7 +113,7 @@ function LoginFallback() {
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Company Payroll & Expense</CardTitle>
+          <CardTitle>Accruva</CardTitle>
           <CardDescription>Loading…</CardDescription>
         </CardHeader>
         <CardContent>

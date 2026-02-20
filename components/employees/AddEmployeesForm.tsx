@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCurrencies } from "@/lib/api/currency";
 
 export default function AddEmployeesForm({
   employee,
@@ -34,6 +35,8 @@ export default function AddEmployeesForm({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
+  const { data: currencies = [] } = useCurrencies();
+
   const [form, setForm] = useState<CreateEmployeeInput>({
     full_name: employee?.full_name ?? "",
     employee_id: employee?.employee_id ?? "",
@@ -45,6 +48,9 @@ export default function AddEmployeesForm({
       employee?.joining_date ?? new Date().toISOString().slice(0, 10),
     payment_method_notes: employee?.payment_method_notes ?? "",
     status: employee?.status ?? "active",
+    country: employee?.country ?? "",
+    city: employee?.city ?? "",
+    currency_id: employee?.currency_id ?? employee?.currencies?.id ?? null,
   });
 
   useEffect(() => {
@@ -59,6 +65,9 @@ export default function AddEmployeesForm({
         employee?.joining_date ?? new Date().toISOString().slice(0, 10),
       payment_method_notes: employee?.payment_method_notes ?? "",
       status: employee?.status ?? "active",
+      country: employee?.country ?? "",
+      city: employee?.city ?? "",
+      currency_id: employee?.currency_id ?? employee?.currencies?.id ?? null,
     });
   }, [employee]);
 
@@ -70,7 +79,10 @@ export default function AddEmployeesForm({
       !byId.has(employee.department_id) &&
       employee.departments
     ) {
-      return [{ id: employee.department_id, name: employee.departments.name }, ...departments];
+      return [
+        { id: employee.department_id, name: employee.departments.name },
+        ...departments,
+      ];
     }
     return [...departments];
   }, [departments, employee?.department_id, employee?.departments]);
@@ -84,7 +96,14 @@ export default function AddEmployeesForm({
     e.preventDefault();
     const payload: CreateEmployeeInput = {
       ...form,
-      department_id: form.department_id && form.department_id !== "__none__" ? form.department_id : null,
+      department_id:
+        form.department_id && form.department_id !== "__none__"
+          ? form.department_id
+          : null,
+      currency_id:
+        form.currency_id && form.currency_id !== "__none__"
+          ? form.currency_id
+          : null,
     };
     try {
       if (isEdit) {
@@ -125,7 +144,7 @@ export default function AddEmployeesForm({
             required
           />
         </div>
-        <div className="grid gap-2">
+        {/* <div className="grid gap-2">
           <Label htmlFor="employee_id">Employee ID (optional)</Label>
           <Input
             id="employee_id"
@@ -133,6 +152,56 @@ export default function AddEmployeesForm({
             onChange={(e) =>
               setForm((p) => ({ ...p, employee_id: e.target.value || null }))
             }
+          />
+        </div> */}
+        <div className="grid gap-2">
+          <Label htmlFor="country">Country</Label>
+          <Input
+            id="country"
+            value={form.country ?? ""}
+            onChange={(e) =>
+              setForm((p) => ({ ...p, country: e.target.value }))
+            }
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            value={form.city ?? ""}
+            onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="currency">Currency</Label>
+          <Select
+            value={form.currency_id ?? "__none__"}
+            onValueChange={(v) =>
+              setForm((p) => ({
+                ...p,
+                currency_id: v === "__none__" ? null : v,
+              }))
+            }
+          >
+            <SelectTrigger id="currency">
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">No currency</SelectItem>
+              {currencies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="phone">Phone</Label>
+          <Input
+            id="phone"
+            value={form.phone ?? ""}
+            onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
           />
         </div>
         <div className="grid gap-2">
@@ -145,7 +214,10 @@ export default function AddEmployeesForm({
             <Select
               value={form.department_id ?? "__none__"}
               onValueChange={(v) =>
-                setForm((p) => ({ ...p, department_id: v === "__none__" ? null : v }))
+                setForm((p) => ({
+                  ...p,
+                  department_id: v === "__none__" ? null : v,
+                }))
               }
             >
               <SelectTrigger id="department">
@@ -237,8 +309,8 @@ export default function AddEmployeesForm({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="active">Working</SelectItem>
+                <SelectItem value="inactive">Not working</SelectItem>
               </SelectContent>
             </Select>
           </div>

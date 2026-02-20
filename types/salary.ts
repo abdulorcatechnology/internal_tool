@@ -17,7 +17,12 @@ export type SalaryRecord = {
 };
 
 export type SalaryRecordWithEmployee = SalaryRecord & {
-  employees?: { full_name: string; employee_id: string | null } | null;
+  employees?: {
+    full_name: string;
+    employee_id: string | null;
+    monthly_salary: number;
+    currencies?: { id: string; code: string; name: string | null } | null;
+  } | null;
 };
 
 export type CreateSalaryRecordInput = {

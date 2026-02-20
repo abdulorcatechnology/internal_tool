@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -30,7 +31,7 @@ const navItems = [
   { label: "Employees", href: "/dashboard/employees", icon: Users },
   { label: "Salary", href: "/dashboard/salary", icon: Wallet },
   { label: "Expenses", href: "/dashboard/expenses", icon: Receipt },
-  { label: "Reports", href: "/dashboard/reports", icon: FileBarChart },
+  // { label: "Reports", href: "/dashboard/reports", icon: FileBarChart },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -44,10 +45,20 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar className="sidebar-orca">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
-        <Link href="/dashboard" className="font-semibold text-sidebar-foreground">
-          Payroll & Expense
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 font-semibold text-sidebar-foreground"
+        >
+          <Image
+            src="/orca-tech-logo.png"
+            alt="Accruva"
+            width={64}
+            height={64}
+            className="size-24 object-contain"
+          />
+          <span>Accruva</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -60,10 +71,11 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.href}
+                    className="h-10"
                   >
                     <Link href={item.href}>
                       <item.icon className="size-4" />
-                      <span>{item.label}</span>
+                      <span className="text-base">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

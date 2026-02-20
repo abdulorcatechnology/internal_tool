@@ -1,8 +1,27 @@
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import monthHelper from "@/lib/helper/month";
+import {
+  fetchReportingCurrencyId,
+  fetchExchangeRates,
+} from "@/lib/api/settings";
 
 const DASHBOARD_KEY = ["dashboard"] as const;
+
+type ExchangeRates = Record<string, number>;
+
+function convertToReporting(
+  amount: number,
+  currencyId: string | null,
+  reportingCurrencyId: string | null,
+  rates: ExchangeRates,
+): number {
+  if (!reportingCurrencyId || !currencyId) return amount;
+  if (currencyId === reportingCurrencyId) return amount;
+  const rate = rates[currencyId];
+  if (rate == null || rate <= 0) return amount;
+  return amount * rate;
+}
 
 function supabase() {
   return createClient();
@@ -34,17 +53,21 @@ export async function fetchPayrollAndExpensesByMonth(): Promise<
   const endDate = monthHelper.nextMonth(monthHelper.monthToDate(endYm));
 
   const [
+    reportingCurrencyId,
+    rates,
     { data: salaryRecords, error: salaryError },
     { data: dayExpenses, error: expensesError },
   ] = await Promise.all([
+    fetchReportingCurrencyId(),
+    fetchExchangeRates(),
     supabase()
       .from("salary_records")
-      .select("month, net_salary")
+      .select("month, net_salary, employees(currency_id)")
       .gte("month", startDate)
       .lt("month", endDate),
     supabase()
       .from("day_to_day_expenses")
-      .select("date, amount")
+      .select("date, amount, currency_id")
       .gte("date", startDate)
       .lt("date", endDate),
   ]);
@@ -55,13 +78,39 @@ export async function fetchPayrollAndExpensesByMonth(): Promise<
   const payrollByMonth = new Map<string, number>();
   const expensesByMonth = new Map<string, number>();
 
-  for (const r of (salaryRecords ?? []) as { month: string; net_salary: number }[]) {
+  type SalaryRow = {
+    month: string;
+    net_salary: number;
+    employees: { currency_id: string | null } | null;
+  };
+  const salaryListRaw = (salaryRecords ?? []) as unknown as SalaryRow[];
+  for (const r of salaryListRaw) {
     const ym = r.month.slice(0, 7);
-    payrollByMonth.set(ym, (payrollByMonth.get(ym) ?? 0) + Number(r.net_salary));
+    const currencyId =
+      (Array.isArray(r.employees) ? r.employees[0] : r.employees)
+        ?.currency_id ?? null;
+    const converted = convertToReporting(
+      Number(r.net_salary),
+      currencyId,
+      reportingCurrencyId,
+      rates,
+    );
+    payrollByMonth.set(ym, (payrollByMonth.get(ym) ?? 0) + converted);
   }
-  for (const r of (dayExpenses ?? []) as { date: string; amount: number }[]) {
+  type ExpenseRow = {
+    date: string;
+    amount: number;
+    currency_id: string | null;
+  };
+  for (const r of (dayExpenses ?? []) as ExpenseRow[]) {
     const ym = r.date.slice(0, 7);
-    expensesByMonth.set(ym, (expensesByMonth.get(ym) ?? 0) + Number(r.amount));
+    const converted = convertToReporting(
+      Number(r.amount),
+      r.currency_id ?? null,
+      reportingCurrencyId,
+      rates,
+    );
+    expensesByMonth.set(ym, (expensesByMonth.get(ym) ?? 0) + converted);
   }
 
   const result: PayrollAndExpensesByMonth[] = [];
@@ -89,49 +138,93 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
   const currentMonthEnd = monthHelper.nextMonth(currentMonthStart);
 
   const [
+    reportingCurrencyId,
+    rates,
     { data: salaryRecords },
     { data: dayExpenses },
     { data: fixedAssets },
   ] = await Promise.all([
+    fetchReportingCurrencyId(),
+    fetchExchangeRates(),
     supabase()
       .from("salary_records")
-      .select("month, net_salary, status")
+      .select("month, net_salary, status, employees(currency_id)")
       .gte("month", yearStart)
       .lt("month", currentMonthEnd),
     supabase()
       .from("day_to_day_expenses")
-      .select("amount")
+      .select("amount, currency_id")
       .gte("date", currentMonthStart)
       .lt("date", currentMonthEnd),
-    supabase().from("fixed_assets").select("cost").eq("status", "active"),
+    supabase()
+      .from("fixed_assets")
+      .select("cost, currency_id")
+      .eq("status", "active"),
   ]);
 
-  const salaryList = (salaryRecords ?? []) as {
+  type SalaryRow = {
     month: string;
     net_salary: number;
     status: string;
-  }[];
+    employees: { currency_id: string | null } | null;
+  };
+  const salaryList = (salaryRecords ?? []) as unknown as SalaryRow[];
   const currentMonthRecords = salaryList.filter(
     (r) => r.month.slice(0, 7) === currentYm,
   );
 
+  const empCurrency = (r: SalaryRow) =>
+    (Array.isArray(r.employees) ? r.employees[0] : r.employees)?.currency_id ??
+    null;
   const totalMonthlyPayroll = currentMonthRecords.reduce(
-    (s, r) => s + Number(r.net_salary),
+    (s, r) =>
+      s +
+      convertToReporting(
+        Number(r.net_salary),
+        empCurrency(r),
+        reportingCurrencyId,
+        rates,
+      ),
     0,
   );
   const pendingSalariesCount = currentMonthRecords.filter(
     (r) => r.status === "pending",
   ).length;
   const annualPayrollYTD = salaryList.reduce(
-    (s, r) => s + Number(r.net_salary),
+    (s, r) =>
+      s +
+      convertToReporting(
+        Number(r.net_salary),
+        empCurrency(r),
+        reportingCurrencyId,
+        rates,
+      ),
     0,
   );
+
+  type ExpenseRow = { amount: number; currency_id: string | null };
   const expensesThisMonth = (dayExpenses ?? []).reduce(
-    (s: number, r: { amount: number }) => s + Number(r.amount),
+    (s: number, r: ExpenseRow) =>
+      s +
+      convertToReporting(
+        Number(r.amount),
+        r.currency_id ?? null,
+        reportingCurrencyId,
+        rates,
+      ),
     0,
   );
+
+  type AssetRow = { cost: number; currency_id: string | null };
   const fixedAssetsTotalValue = (fixedAssets ?? []).reduce(
-    (s: number, r: { cost: number }) => s + Number(r.cost),
+    (s: number, r: AssetRow) =>
+      s +
+      convertToReporting(
+        Number(r.cost),
+        r.currency_id ?? null,
+        reportingCurrencyId,
+        rates,
+      ),
     0,
   );
 
@@ -150,19 +243,37 @@ export async function fetchPayrollByMonth(): Promise<PayrollByMonth[]> {
   const startDate = monthHelper.monthToDate(startYm);
   const endDate = monthHelper.nextMonth(monthHelper.monthToDate(endYm));
 
-  const { data, error } = await supabase()
-    .from("salary_records")
-    .select("month, net_salary")
-    .gte("month", startDate)
-    .lt("month", endDate);
+  const [reportingCurrencyId, rates, { data, error }] = await Promise.all([
+    fetchReportingCurrencyId(),
+    fetchExchangeRates(),
+    supabase()
+      .from("salary_records")
+      .select("month, net_salary, employees(currency_id)")
+      .gte("month", startDate)
+      .lt("month", endDate),
+  ]);
 
   if (error) throw error;
-  const list = (data ?? []) as { month: string; net_salary: number }[];
+  type Row = {
+    month: string;
+    net_salary: number;
+    employees: { currency_id: string | null } | null;
+  };
+  const list = (data ?? []) as unknown as Row[];
 
   const byMonth = new Map<string, number>();
   for (const r of list) {
     const ym = r.month.slice(0, 7);
-    byMonth.set(ym, (byMonth.get(ym) ?? 0) + Number(r.net_salary));
+    const currencyId =
+      (Array.isArray(r.employees) ? r.employees[0] : r.employees)
+        ?.currency_id ?? null;
+    const converted = convertToReporting(
+      Number(r.net_salary),
+      currencyId,
+      reportingCurrencyId,
+      rates,
+    );
+    byMonth.set(ym, (byMonth.get(ym) ?? 0) + converted);
   }
 
   const result: PayrollByMonth[] = [];

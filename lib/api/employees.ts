@@ -19,7 +19,7 @@ export async function fetchEmployees(
 ): Promise<Employee[]> {
   let q = supabase()
     .from("employees")
-    .select("*, departments(id, name)")
+    .select("*, departments(id, name), currencies(id, code)")
     .order("created_at", { ascending: false });
 
   if (filters?.department_id) {
@@ -27,6 +27,9 @@ export async function fetchEmployees(
   }
   if (filters?.status) {
     q = q.eq("status", filters.status);
+  }
+  if (filters?.country) {
+    q = q.eq("country", filters.country);
   }
 
   const { data, error } = await q;
@@ -37,7 +40,7 @@ export async function fetchEmployees(
 export async function fetchEmployeeById(id: string): Promise<Employee | null> {
   const { data, error } = await supabase()
     .from("employees")
-    .select("*, departments(id, name)")
+    .select("*, departments(id, name), currencies(id, code)")
     .eq("id", id)
     .single();
   if (error) {
@@ -67,6 +70,10 @@ export async function createEmployee(
       joining_date: input.joining_date,
       payment_method_notes: input.payment_method_notes ?? null,
       status: input.status ?? "active",
+      country: input.country ?? "",
+      city: input.city ?? "",
+      currency_id: input.currency_id ?? null,
+      phone: input.phone ?? null,
     })
     .select()
     .single();
@@ -111,6 +118,11 @@ export async function updateEmployee(
   if (input.payment_method_notes !== undefined)
     payload.payment_method_notes = input.payment_method_notes;
   if (input.status !== undefined) payload.status = input.status;
+  if (input.country !== undefined) payload.country = input.country;
+  if (input.city !== undefined) payload.city = input.city;
+  if (input.currency_id !== undefined)
+    payload.currency_id = input.currency_id ?? null;
+  if (input.phone !== undefined) payload.phone = input.phone;
 
   const { data, error } = await supabase()
     .from("employees")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Pencil, UserX, UserCheck } from "lucide-react";
+import { Plus, Pencil, UserX, UserCheck, Eye } from "lucide-react";
 import {
   useEmployees,
   useDeactivateEmployee,
@@ -17,19 +17,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import DataTable from "@/components/shared/DataTable";
 import StatusBadge from "@/components/shared/StatusBadge";
 import { useProfile } from "@/lib/api/profile";
 import AddEmployeesForm from "@/components/employees/AddEmployeesForm";
 import monthHelper from "@/lib/helper/month";
-import currencyHelper from "@/lib/helper/currency";
 import Heading from "@/components/shared/Heading";
 import SelectDropdown from "@/components/shared/SelectDropdown";
 import { STATUS_OPTIONS } from "@/lib/options/employees";
+import EmployeeInfo from "@/components/employees/EmployeeInfo";
 
 const formatDate = monthHelper.formatDate;
-const formatCurrency = currencyHelper.formatCurrency;
 
 export default function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState<EmployeeStatus | "all">(
@@ -38,13 +43,21 @@ export default function EmployeesPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string>("all");
 
   const filters = useMemo(() => {
-    const f: { status?: EmployeeStatus; department_id?: string } = {};
+    const f: {
+      status?: EmployeeStatus;
+      department_id?: string;
+      country?: string;
+    } = {};
     if (statusFilter !== "all") f.status = statusFilter;
     if (departmentFilter !== "all") f.department_id = departmentFilter;
+    if (countryFilter !== "all") f.country = countryFilter;
     return f;
-  }, [statusFilter, departmentFilter]);
+  }, [statusFilter, departmentFilter, countryFilter]);
 
   const { data: employees = [], isLoading } = useEmployees(filters);
   const { data: departments = [] } = useDepartments();
@@ -61,6 +74,11 @@ export default function EmployeesPage() {
   function openEdit(emp: Employee) {
     setEditingEmployee(emp);
     setSheetOpen(true);
+  }
+
+  function openView(emp: Employee) {
+    setViewingEmployee(emp);
+    setViewOpen(true);
   }
 
   async function handleDeactivate(emp: Employee) {
@@ -86,6 +104,20 @@ export default function EmployeesPage() {
       await activateMutation.mutateAsync(emp.id);
     } catch (_) {}
   }
+
+  const countryOptions = useMemo(() => {
+    const values = [
+      ...new Set(
+        employees
+          .map((e) => e.country)
+          .filter((c): c is string => Boolean(c) && c !== "all"),
+      ),
+    ].sort();
+    return [
+      { value: "all", label: "All countries" },
+      ...values.map((c) => ({ value: c, label: c })),
+    ];
+  }, [employees]);
 
   return (
     <div className="space-y-6">
@@ -124,6 +156,12 @@ export default function EmployeesPage() {
               value={departmentFilter}
               onChange={setDepartmentFilter}
             />
+            <SelectDropdown
+              label="Country"
+              options={countryOptions}
+              value={countryFilter}
+              onChange={(v) => setCountryFilter(v as string)}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -133,6 +171,7 @@ export default function EmployeesPage() {
             </p>
           ) : (
             <DataTable<Employee>
+              // onClick={(emp) => openView(emp)}
               columns={[
                 {
                   id: "name",
@@ -155,7 +194,8 @@ export default function EmployeesPage() {
                   id: "salary",
                   header: "Salary",
                   align: "right",
-                  cell: (emp) => formatCurrency(emp.monthly_salary),
+                  cell: (emp) =>
+                    `${emp.currencies?.code} ${emp.monthly_salary}`,
                 },
                 {
                   id: "joining",
@@ -169,7 +209,7 @@ export default function EmployeesPage() {
                     <StatusBadge
                       variant={emp.status === "active" ? "success" : "muted"}
                     >
-                      {emp.status}
+                      {emp.status == "active" ? "Working" : "Not working"}
                     </StatusBadge>
                   ),
                 },
@@ -181,6 +221,14 @@ export default function EmployeesPage() {
                 canEdit
                   ? (emp) => (
                       <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => openView(emp)}
+                          title="View"
+                        >
+                          <Eye className="size-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon-sm"
@@ -229,6 +277,21 @@ export default function EmployeesPage() {
             onSuccess={() => setSheetOpen(false)}
             onCancel={() => setSheetOpen(false)}
           />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={viewOpen} onOpenChange={setViewOpen}>
+        <SheetContent
+          className="overflow-y-auto flex w-full flex-col sm:max-w-md"
+          side="right"
+        >
+          <SheetHeader>
+            <SheetTitle>Employee Information</SheetTitle>
+            <SheetDescription>
+              Full details for the selected employee.
+            </SheetDescription>
+          </SheetHeader>
+          <EmployeeInfo employee={viewingEmployee} />
         </SheetContent>
       </Sheet>
     </div>
