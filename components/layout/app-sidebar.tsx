@@ -45,7 +45,7 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar>
+    <Sidebar className="sidebar-orca">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
         <Link
           href="/dashboard"
@@ -54,9 +54,9 @@ export function AppSidebar() {
           <Image
             src="/orca-tech-logo.png"
             alt="Accruva"
-            width={32}
-            height={32}
-            className="size-8 object-contain"
+            width={64}
+            height={64}
+            className="size-24 object-contain"
           />
           <span>Accruva</span>
         </Link>
@@ -69,12 +69,13 @@ export function AppSidebar() {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
+                    size="lg"
                     asChild
                     isActive={pathname === item.href}
                   >
                     <Link href={item.href}>
                       <item.icon className="size-4" />
-                      <span>{item.label}</span>
+                      <span className="text-lg">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

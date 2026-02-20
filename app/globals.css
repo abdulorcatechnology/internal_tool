@@ -128,3 +128,19 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Sidebar: Orca logo colors (dark #003366, accent #0096FF) */
+.sidebar-orca {
+  --sidebar: #003366;
+  --sidebar-foreground: #fff;
+  --sidebar-primary: #0096ff;
+  --sidebar-primary-foreground: #fff;
+  --sidebar-accent: #0056a0;
+  --sidebar-accent-foreground: #fff;
+  --sidebar-border: rgba(255, 255, 255, 0.2);
+}
+.sidebar-orca [data-sidebar="sidebar"],
+.sidebar-orca [data-slot="sidebar"] {
+  background-color: #003366 !important;
+  color: #fff;
+}
