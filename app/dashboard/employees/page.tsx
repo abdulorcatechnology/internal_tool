@@ -45,13 +45,19 @@ export default function EmployeesPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
+  const [countryFilter, setCountryFilter] = useState<string>("all");
 
   const filters = useMemo(() => {
-    const f: { status?: EmployeeStatus; department_id?: string } = {};
+    const f: {
+      status?: EmployeeStatus;
+      department_id?: string;
+      country?: string;
+    } = {};
     if (statusFilter !== "all") f.status = statusFilter;
     if (departmentFilter !== "all") f.department_id = departmentFilter;
+    if (countryFilter !== "all") f.country = countryFilter;
     return f;
-  }, [statusFilter, departmentFilter]);
+  }, [statusFilter, departmentFilter, countryFilter]);
 
   const { data: employees = [], isLoading } = useEmployees(filters);
   const { data: departments = [] } = useDepartments();
@@ -99,6 +105,20 @@ export default function EmployeesPage() {
     } catch (_) {}
   }
 
+  const countryOptions = useMemo(() => {
+    const values = [
+      ...new Set(
+        employees
+          .map((e) => e.country)
+          .filter((c): c is string => Boolean(c) && c !== "all"),
+      ),
+    ].sort();
+    return [
+      { value: "all", label: "All countries" },
+      ...values.map((c) => ({ value: c, label: c })),
+    ];
+  }, [employees]);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -135,6 +155,12 @@ export default function EmployeesPage() {
               ]}
               value={departmentFilter}
               onChange={setDepartmentFilter}
+            />
+            <SelectDropdown
+              label="Country"
+              options={countryOptions}
+              value={countryFilter}
+              onChange={(v) => setCountryFilter(v as string)}
             />
           </div>
         </CardHeader>

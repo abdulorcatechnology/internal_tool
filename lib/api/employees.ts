@@ -28,6 +28,9 @@ export async function fetchEmployees(
   if (filters?.status) {
     q = q.eq("status", filters.status);
   }
+  if (filters?.country) {
+    q = q.eq("country", filters.country);
+  }
 
   const { data, error } = await q;
   if (error) throw error;
@@ -117,7 +120,8 @@ export async function updateEmployee(
   if (input.status !== undefined) payload.status = input.status;
   if (input.country !== undefined) payload.country = input.country;
   if (input.city !== undefined) payload.city = input.city;
-  if (input.currency_id !== undefined) payload.currency_id = input.currency_id ?? null;
+  if (input.currency_id !== undefined)
+    payload.currency_id = input.currency_id ?? null;
   if (input.phone !== undefined) payload.phone = input.phone;
 
   const { data, error } = await supabase()
