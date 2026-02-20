@@ -28,12 +28,15 @@ import {
   usePayrollByMonth,
   usePayrollAndExpensesByMonth,
 } from "@/lib/api/dashboard";
+import { useReportingCurrencyId } from "@/lib/api/settings";
+import { useCurrencies } from "@/lib/api/currency";
 import currencyHelper from "@/lib/helper/currency";
 import { payrollChartConfig, trendChartConfig } from "@/lib/options/dashboard";
 import OverviewCard from "@/components/dashboard/OverviewCard";
 import Heading from "@/components/shared/Heading";
 
 const formatCurrency = currencyHelper.formatCurrency;
+const formatWithCode = currencyHelper.formatWithCode;
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
@@ -41,19 +44,30 @@ export default function DashboardPage() {
     usePayrollByMonth();
   const { data: trendData = [], isLoading: trendLoading } =
     usePayrollAndExpensesByMonth();
+  const { data: reportingCurrencyId } = useReportingCurrencyId();
+  const { data: currencies = [] } = useCurrencies();
+  const reportingCode =
+    currencies.find((c) => c.id === reportingCurrencyId)?.code ?? null;
 
   return (
     <div className="space-y-6">
       <div>
         <Heading
           title="Dashboard"
-          description="Overview of payroll and expenses."
+          description={
+            reportingCode
+              ? `Overview of payroll and expenses. All amounts in ${reportingCode}.`
+              : "Overview of payroll and expenses. Set a reporting currency in Settings to convert all amounts to one currency."
+          }
         />
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <OverviewCard
           title="Total monthly payroll"
-          value={formatCurrency(stats?.totalMonthlyPayroll ?? 0)}
+          value={formatWithCode(
+            stats?.totalMonthlyPayroll ?? 0,
+            reportingCode,
+          )}
           loading={statsLoading}
         />
 
@@ -65,19 +79,22 @@ export default function DashboardPage() {
 
         <OverviewCard
           title="Annual payroll (YTD)"
-          value={formatCurrency(stats?.annualPayrollYTD ?? 0)}
+          value={formatWithCode(stats?.annualPayrollYTD ?? 0, reportingCode)}
           loading={statsLoading}
         />
 
         <OverviewCard
           title="Office expenses (this month)"
-          value={formatCurrency(stats?.expensesThisMonth ?? 0)}
+          value={formatWithCode(stats?.expensesThisMonth ?? 0, reportingCode)}
           loading={statsLoading}
         />
 
         <OverviewCard
           title="Fixed assets (total value)"
-          value={formatCurrency(stats?.fixedAssetsTotalValue ?? 0)}
+          value={formatWithCode(
+            stats?.fixedAssetsTotalValue ?? 0,
+            reportingCode,
+          )}
           loading={statsLoading}
         />
       </div>
@@ -116,12 +133,16 @@ export default function DashboardPage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => formatCurrency(v)}
+                  tickFormatter={(v) =>
+                    formatWithCode(Number(v), reportingCode)
+                  }
                 />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(v) => formatCurrency(Number(v))}
+                      formatter={(v) =>
+                        formatWithCode(Number(v), reportingCode)
+                      }
                     />
                   }
                 />
@@ -173,12 +194,16 @@ export default function DashboardPage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => formatCurrency(v)}
+                  tickFormatter={(v) =>
+                    formatWithCode(Number(v), reportingCode)
+                  }
                 />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(v) => formatCurrency(Number(v))}
+                      formatter={(v) =>
+                        formatWithCode(Number(v), reportingCode)
+                      }
                     />
                   }
                 />
@@ -238,12 +263,16 @@ export default function DashboardPage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => formatCurrency(v)}
+                  tickFormatter={(v) =>
+                    formatWithCode(Number(v), reportingCode)
+                  }
                 />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(v) => formatCurrency(Number(v))}
+                      formatter={(v) =>
+                        formatWithCode(Number(v), reportingCode)
+                      }
                     />
                   }
                 />
@@ -297,12 +326,16 @@ export default function DashboardPage() {
                   tickLine={false}
                   axisLine={false}
                   tickMargin={8}
-                  tickFormatter={(v) => formatCurrency(v)}
+                  tickFormatter={(v) =>
+                    formatWithCode(Number(v), reportingCode)
+                  }
                 />
                 <ChartTooltip
                   content={
                     <ChartTooltipContent
-                      formatter={(v) => formatCurrency(Number(v))}
+                      formatter={(v) =>
+                        formatWithCode(Number(v), reportingCode)
+                      }
                     />
                   }
                 />
