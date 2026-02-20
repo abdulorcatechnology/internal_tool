@@ -33,7 +33,7 @@ export type CreateEmployeeInput = {
   status?: EmployeeStatus;
   country: string;
   city: string;
-  currency: string;
+  currency_id?: string | null;
   phone?: string | null;
 };
 
@@ -44,5 +44,5 @@ export type EmployeesFilters = {
   status?: EmployeeStatus;
   country?: string | null;
   city?: string | null;
-  currency?: string | null;
+  currency_id?: string | null;
 };

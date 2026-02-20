@@ -79,8 +79,8 @@ export default function EmployeeInfo({ employee }: EmployeeInfoProps) {
         <InfoRow
           label="Monthly salary"
           value={
-            employee.currency
-              ? `${employee.currency} ${employee.monthly_salary}`
+            employee.currencies?.code
+              ? `${employee.currencies.code} ${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(employee.monthly_salary)}`
               : formatCurrency(employee.monthly_salary)
           }
         />

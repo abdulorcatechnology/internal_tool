@@ -37,7 +37,7 @@ export async function fetchEmployees(
 export async function fetchEmployeeById(id: string): Promise<Employee | null> {
   const { data, error } = await supabase()
     .from("employees")
-    .select("*, departments(id, name)")
+    .select("*, departments(id, name), currencies(id, code)")
     .eq("id", id)
     .single();
   if (error) {
@@ -69,7 +69,7 @@ export async function createEmployee(
       status: input.status ?? "active",
       country: input.country ?? "",
       city: input.city ?? "",
-      currency: input.currency ?? "",
+      currency_id: input.currency_id ?? null,
       phone: input.phone ?? null,
     })
     .select()
@@ -117,7 +117,7 @@ export async function updateEmployee(
   if (input.status !== undefined) payload.status = input.status;
   if (input.country !== undefined) payload.country = input.country;
   if (input.city !== undefined) payload.city = input.city;
-  if (input.currency !== undefined) payload.currency = input.currency;
+  if (input.currency_id !== undefined) payload.currency_id = input.currency_id ?? null;
   if (input.phone !== undefined) payload.phone = input.phone;
 
   const { data, error } = await supabase()

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useCurrencies } from "@/lib/api/currency";
 
 export default function AddEmployeesForm({
   employee,
@@ -34,6 +35,8 @@ export default function AddEmployeesForm({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
+  const { data: currencies = [] } = useCurrencies();
+
   const [form, setForm] = useState<CreateEmployeeInput>({
     full_name: employee?.full_name ?? "",
     employee_id: employee?.employee_id ?? "",
@@ -47,7 +50,7 @@ export default function AddEmployeesForm({
     status: employee?.status ?? "active",
     country: employee?.country ?? "",
     city: employee?.city ?? "",
-    currency: employee?.currency ?? "",
+    currency_id: employee?.currency_id ?? employee?.currencies?.id ?? null,
   });
 
   useEffect(() => {
@@ -64,7 +67,7 @@ export default function AddEmployeesForm({
       status: employee?.status ?? "active",
       country: employee?.country ?? "",
       city: employee?.city ?? "",
-      currency: employee?.currency ?? "",
+      currency_id: employee?.currency_id ?? employee?.currencies?.id ?? null,
     });
   }, [employee]);
 
@@ -96,6 +99,10 @@ export default function AddEmployeesForm({
       department_id:
         form.department_id && form.department_id !== "__none__"
           ? form.department_id
+          : null,
+      currency_id:
+        form.currency_id && form.currency_id !== "__none__"
+          ? form.currency_id
           : null,
     };
     try {
@@ -167,13 +174,27 @@ export default function AddEmployeesForm({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="currency">Currency</Label>
-          <Input
-            id="currency"
-            value={form.currency ?? ""}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, currency: e.target.value }))
+          <Select
+            value={form.currency_id ?? "__none__"}
+            onValueChange={(v) =>
+              setForm((p) => ({
+                ...p,
+                currency_id: v === "__none__" ? null : v,
+              }))
             }
-          />
+          >
+            <SelectTrigger id="currency">
+              <SelectValue placeholder="Select currency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">No currency</SelectItem>
+              {currencies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="grid gap-2">
           <Label htmlFor="phone">Phone</Label>
