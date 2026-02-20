@@ -31,7 +31,7 @@ const navItems = [
   { label: "Employees", href: "/dashboard/employees", icon: Users },
   { label: "Salary", href: "/dashboard/salary", icon: Wallet },
   { label: "Expenses", href: "/dashboard/expenses", icon: Receipt },
-  { label: "Reports", href: "/dashboard/reports", icon: FileBarChart },
+  // { label: "Reports", href: "/dashboard/reports", icon: FileBarChart },
   { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
