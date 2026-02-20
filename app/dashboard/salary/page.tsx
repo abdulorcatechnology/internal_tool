@@ -12,6 +12,7 @@ import SalaryTable from "@/components/salary/SalaryTable";
 import SalaryAnalysis from "@/components/salary/SalaryAnalysis";
 import Heading from "@/components/shared/Heading";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCurrencies } from "@/lib/api/currency";
 
 type SalaryTab = "records" | "analysis";
 
@@ -23,6 +24,7 @@ export default function SalaryPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingRecord, setEditingRecord] =
     useState<SalaryRecordWithEmployee | null>(null);
+  const [currencyFilter, setCurrencyFilter] = useState<string>("all");
 
   const filters = useMemo(() => {
     const f: { month?: string; status?: SalaryStatus } = {};
@@ -33,14 +35,20 @@ export default function SalaryPage() {
 
   const { data: records = [], isLoading } = useSalaryRecords(filters);
   const filteredRecords = useMemo(() => {
+    let list = records;
+    if (currencyFilter && currencyFilter !== "all") {
+      list = list.filter(
+        (r) => r.employees?.currencies?.id === currencyFilter,
+      );
+    }
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return records;
-    return records.filter((r) =>
+    if (!q) return list;
+    return list.filter((r) =>
       r.employees?.full_name?.toLowerCase().includes(q),
     );
-  }, [records, searchQuery]);
+  }, [records, currencyFilter, searchQuery]);
   const { data: profile } = useProfile();
-
+  const { data: currencies = [] } = useCurrencies();
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
   function openAdd() {
@@ -91,6 +99,9 @@ export default function SalaryPage() {
             isLoading={isLoading}
             openEdit={openEdit}
             openAdd={openAdd}
+            currencyFilter={currencyFilter}
+            setCurrencyFilter={setCurrencyFilter}
+            currencies={currencies}
           />
         </TabsContent>
         <TabsContent value="analysis">
