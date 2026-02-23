@@ -1,11 +1,11 @@
 import {
-  AssetType,
+  PresetAssetType,
   AssetStatus,
   ExpenseCategory,
   ExpensePaymentStatus,
 } from "@/types/expenses";
 
-const ASSET_TYPE_OPTIONS: { value: AssetType; label: string }[] = [
+const ASSET_TYPE_OPTIONS: { value: PresetAssetType; label: string }[] = [
   { value: "laptop", label: "Laptop" },
   { value: "server", label: "Server" },
   { value: "phone", label: "Phone" },

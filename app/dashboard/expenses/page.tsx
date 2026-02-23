@@ -7,7 +7,6 @@ import { useProfile } from "@/lib/api/profile";
 import type {
   FixedAssetWithEmployee,
   FixedAssetFilters,
-  AssetType,
   AssetStatus,
   DayToDayExpense,
   DayToDayExpenseFilters,
@@ -28,7 +27,7 @@ export default function ExpensesPage() {
   const canEdit = profile?.role === "admin" || profile?.role === "finance";
 
   // Fixed assets state
-  const [assetTypeFilter, setAssetTypeFilter] = useState<AssetType | "all">(
+  const [assetTypeFilter, setAssetTypeFilter] = useState<string | "all">(
     "all",
   );
   const [assetStatusFilter, setAssetStatusFilter] = useState<

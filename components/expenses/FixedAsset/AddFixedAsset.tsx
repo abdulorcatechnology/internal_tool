@@ -6,7 +6,6 @@ import { useEmployees } from "@/lib/api/employees";
 import type {
   FixedAssetWithEmployee,
   CreateFixedAssetInput,
-  AssetType,
   AssetStatus,
 } from "@/types/expenses";
 import { Button } from "@/components/ui/button";
@@ -101,7 +100,7 @@ export default function FixedAssetForm({
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <SheetHeader>
         <SheetTitle>{isEdit ? "Edit asset" : "Add fixed asset"}</SheetTitle>
-        <SheetDescription>Laptop, Server, Phone, Furniture.</SheetDescription>
+        <SheetDescription>Choose a type or enter a custom one (e.g. Monitor, Vehicle).</SheetDescription>
       </SheetHeader>
       <div className="flex flex-1 flex-col gap-4 overflow-auto px-4">
         {mutation.isError && (
@@ -120,13 +119,22 @@ export default function FixedAssetForm({
         <div className="grid gap-2">
           <Label>Type *</Label>
           <Select
-            value={form.asset_type}
-            onValueChange={(v: AssetType) =>
-              setForm((p) => ({ ...p, asset_type: v }))
+            value={
+              expensesOptions.ASSET_TYPE_OPTIONS.some(
+                (o) => o.value === form.asset_type
+              )
+                ? form.asset_type
+                : "other"
+            }
+            onValueChange={(v) =>
+              setForm((p) => ({
+                ...p,
+                asset_type: v === "other" ? "" : v,
+              }))
             }
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Select or use Other" />
             </SelectTrigger>
             <SelectContent>
               {expensesOptions.ASSET_TYPE_OPTIONS.map((o) => (
@@ -134,8 +142,21 @@ export default function FixedAssetForm({
                   {o.label}
                 </SelectItem>
               ))}
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
+          {!expensesOptions.ASSET_TYPE_OPTIONS.some(
+            (o) => o.value === form.asset_type
+          ) && (
+            <Input
+              placeholder="e.g. Monitor, Vehicle, Equipment"
+              value={form.asset_type}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, asset_type: e.target.value.trim() || "" }))
+              }
+              required
+            />
+          )}
         </div>
         <div className="grid gap-2">
           <Label>Purchase date *</Label>
@@ -249,7 +270,14 @@ export default function FixedAssetForm({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={mutation.isPending || !form.currency_id}>
+        <Button
+          type="submit"
+          disabled={
+            mutation.isPending ||
+            !form.currency_id ||
+            !String(form.asset_type).trim()
+          }
+        >
           {mutation.isPending ? "Saving…" : isEdit ? "Update" : "Add asset"}
         </Button>
       </SheetFooter>
