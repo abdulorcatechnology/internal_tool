@@ -2,7 +2,6 @@
 import { Plus, Pencil } from "lucide-react";
 import type {
   FixedAssetWithEmployee,
-  AssetType,
   AssetStatus,
 } from "@/types/expenses";
 import { Button } from "@/components/ui/button";
@@ -32,8 +31,8 @@ const formatDate = monthHelper.formatDate;
 
 interface FixedAssetTableProps {
   canEdit: boolean;
-  assetTypeFilter: AssetType | "all";
-  setAssetTypeFilter: (assetType: AssetType | "all") => void;
+  assetTypeFilter: string | "all";
+  setAssetTypeFilter: (assetType: string | "all") => void;
   assetStatusFilter: AssetStatus | "all";
   setAssetStatusFilter: (assetStatus: AssetStatus | "all") => void;
   fixedAssets: FixedAssetWithEmployee[];
@@ -82,7 +81,7 @@ const FixedAssetTable = ({
               <Select
                 value={assetTypeFilter}
                 onValueChange={(v) =>
-                  setAssetTypeFilter(v as AssetType | "all")
+                  setAssetTypeFilter(v as string | "all")
                 }
               >
                 <SelectTrigger className="w-[120px]">

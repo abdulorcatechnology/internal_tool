@@ -1,4 +1,6 @@
-export type AssetType = "laptop" | "server" | "phone" | "furniture";
+/** Preset options shown in the UI; asset_type in DB is free text. */
+export type PresetAssetType = "laptop" | "server" | "phone" | "furniture";
+export type AssetType = string;
 export type AssetStatus = "active" | "retired";
 
 export type FixedAsset = {
@@ -34,7 +36,7 @@ export type CreateFixedAssetInput = {
 export type UpdateFixedAssetInput = Partial<CreateFixedAssetInput>;
 
 export type FixedAssetFilters = {
-  asset_type?: AssetType;
+  asset_type?: string;
   status?: AssetStatus;
 };
 
