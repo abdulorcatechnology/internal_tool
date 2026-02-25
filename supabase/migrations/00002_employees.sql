@@ -57,3 +57,11 @@ create policy "Admin can delete employees"
   using (public.get_my_role() = 'admin');
 
 comment on table public.employees is 'Employee records; soft delete by setting status to inactive';
+
+
+-- not included 
+-- Add city and country to employees.
+alter table public.employees
+  add column if not exists city text,
+  add column if not exists country text;
+  add column if not exists phone text;
