@@ -1,6 +1,6 @@
--- Currencies as source of truth. Replace employees.currency text and add currency to expenses.
+-- Currencies as source of truth. Replace employees.currency text (if present) and add currency to expenses.
 -- Run after 00007_departments_table.sql and 00005_expenses.sql.
--- Requires: employees.currency (text) exists; get_my_role() exists.
+-- Safe when employees has no currency column (e.g. work DB); backfill runs only if currency exists.
 
 -- 1) Create currencies table (code unique; optional name for display)
 create table public.currencies (
@@ -43,16 +43,24 @@ insert into public.currencies (code, name) values
   ('INR', 'Indian Rupee')
 on conflict (code) do nothing;
 
--- 3) Employees: add currency_id, backfill from employees.currency, drop currency
+-- 3) Employees: add currency_id, backfill from employees.currency (if column exists), drop currency
 alter table public.employees
-  add column currency_id uuid references public.currencies (id) on delete set null;
+  add column if not exists currency_id uuid references public.currencies (id) on delete set null;
 
-update public.employees e
-set currency_id = c.id
-from public.currencies c
-where c.code = trim(e.currency);
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'employees' and column_name = 'currency'
+  ) then
+    update public.employees e
+    set currency_id = c.id
+    from public.currencies c
+    where c.code = trim(e.currency);
+  end if;
+end $$;
 
-create index employees_currency_id_idx on public.employees (currency_id);
+create index if not exists employees_currency_id_idx on public.employees (currency_id);
 
 alter table public.employees drop column if exists currency;
 
